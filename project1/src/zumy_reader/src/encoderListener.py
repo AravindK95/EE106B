@@ -3,10 +3,10 @@ import sys
 import rospy
 import roslib
 import time
-
 import numpy as np
-
 from std_msgs.msg import *
+
+
 
 class RingBuffer():
     def __init__(self, size):
@@ -43,7 +43,7 @@ def make_differentiator(pub, N, scale):
     posFilter = RingBuffer(N)
     inClock = RingBuffer(N)
 
-    def callback(data):
+    def differentiator(data):
         #run every time i see a TFMessage on tf_topic.
         metersPerCount = 0.038*np.pi/600 #0.038 m diameter of treads * pi / 1200 encoder counts per revolution
         encoderCount = scale*data.data
@@ -62,14 +62,25 @@ def make_differentiator(pub, N, scale):
 
         pub.publish(velocityEst)
 
-    return callback
+    return differentiator
 
-def make_pointsetter(pub):
+def make_pointsetter(l_pub, r_pub):
 
     def pointsetter(data):
+        left_setpoint = data.data
+        right_setpoint = data.data
 
+        l_pub.publish(left_setpoint)
+        r_pub.publish(right_setpoint)
 
     return pointsetter
+
+def make_ctrl_listener(pub):
+
+    def ctrl_listener(data):
+        pub.publish(data.data)
+
+    return ctrl_listener
 
 # setpoint: Float64 (target velocity + drift correction)
 # state: Float64    (zumy velocity - differentiate encoders)
@@ -82,18 +93,25 @@ def init():
     rospy.init_node("zumy_reader")
 
     print("Initializing ZumyReader publishers... ")
-    left_state_pub = rospy.Publisher('l_pid/state', Float64, queue_size=10)
-    right_state_pub = rospy.Publisher('r_pid/state', Float64, queue_size=10)
+    left_state_pub = rospy.Publisher('/l_pid/state', Float64, queue_size=10)
+    right_state_pub = rospy.Publisher('/r_pid/state', Float64, queue_size=10)
 
-    left_setpt_pub = rospy.Publisher('l_pid/setpoint', Float64, queue_size=10)
-    right_setpt_pub = rospy.Publisher('r_pid/setpoint', Float64, queue_size=10)
+    left_setpt_pub = rospy.Publisher('/l_pid/setpoint', Float64, queue_size=10)
+    right_setpt_pub = rospy.Publisher('/r_pid/setpoint', Float64, queue_size=10)
+
+    left_enable_pub = rospy.Publisher('/l_pid/enable', Bool, queue_size=10)
+    right_enable_pub = rospy.Publisher('/r_pid/enable', Bool, queue_size=10)
+
+    motor_pub = rospy.Publisher('/zumy7a/cmd_vel', Twist, queue_size=10)
 
     print("Initializing ZumyReader subscribers... ")
     rospy.Subscriber('/zumy7a/l_enc', Int16, make_differentiator(left_state_pub, 5, 1))
     rospy.Subscriber('/zumy7a/r_enc', Int16, make_differentiator(right_state_pub, 5, -1))
 
-    rospy.Subscriber('/zumy_ctrl/setpoint', Float64, make_pointsetter())
+    rospy.Subscriber('/zumy_ctrl/setpoint', Float64, make_pointsetter(left_setpt_pub, right_setpt_pub))
 
+    rospy.Subscriber('/l_pid/controller_effort', Float64, make_ctrl_listener(motor_pub))
+    rospy.Subscriber('/r_pid/controller_effort', Float64, make_ctrl_listener(motor_pub))
 
 if __name__ == '__main__':
     init()
