@@ -1,0 +1,5 @@
+<launch>
+    <include file="$(find odroid_machine)/launch/remote_zumy.launch">
+      <arg name="mname" value="zumy7a" />
+    </include>
+</launch>

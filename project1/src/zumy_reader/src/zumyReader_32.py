@@ -1,16 +1,16 @@
 #!/usr/bin/env python
+from __future__ import division
 import sys
 import rospy
 import roslib
 import time
 import numpy as np
-from __future__ import division
 from std_msgs.msg import *
 from geometry_msgs.msg import *
 
 zumyStop = Twist(Vector3(0,0,0), Vector3(0,0,0))
 metersPerCount = 0.038*np.pi/600 #0.038 m diameter of treads * pi / 600 encoder counts per revolution
-DRIFT_SCALE = 0.0
+DRIFT_SCALE = -0.000001
 
 class RingBuffer():
     def __init__(self, size):
@@ -61,8 +61,8 @@ def make_differentiator(pub, N, scale, idx):
 
         # Drift correction
         encoder_output[idx].push(scale*msg.data)
-        if encoder_output[0].isFull() and encoder_output[1].isFull():
-        	drift_left += encoder_output[0].getAvg() - encoder_output[1].getAvg()
+        if encoder_output[0].filled() and encoder_output[1].filled():
+        	drift_left = encoder_output[0].getAvg() - encoder_output[1].getAvg()
 
         # ticks --> meters conversion
         metersTraveled = scale*msg.data*metersPerCount
@@ -78,7 +78,6 @@ def make_differentiator(pub, N, scale, idx):
         for i in range(len(encoderVals) - 1):
             velocityEst += (encoderVals[i+1][0]-encoderVals[i][0])/(encoderVals[i-1][1]-encoderVals[i][1])
         velocityEst /= (len(encoderVals) - 1)
-        print("vel est: "+str(velocityEst))
         pub.publish(velocityEst)
 
     return differentiator
@@ -167,8 +166,9 @@ def init():
         # print("ctrl_effort: "+str(ctrl_output))
         # How to convert motor velocities to twist? Have an idea if we can bypass PID....
         if is_enabled:
+            print("drift: "+str(drift_left*DRIFT_SCALE))
             trans = Vector3(ctrl_output[0], 0, 0)
-            rot = Vector3(drift_left*DRIFT_SCALE, 0, 0)
+            rot = Vector3(0, 0, drift_left*DRIFT_SCALE)
             motor_pub.publish(Twist(trans, rot))
 
         rate.sleep()
