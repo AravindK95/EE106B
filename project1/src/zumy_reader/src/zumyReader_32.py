@@ -4,18 +4,13 @@ import rospy
 import roslib
 import time
 import numpy as np
+from __future__ import division
 from std_msgs.msg import *
 from geometry_msgs.msg import *
 
-global ctrl_output
-global encoder_output
-global is_enabled
-
-ctrl_output = [0.0, 0.0]
-encoder_output = [0, 0]
-is_enabled = False
-
 zumyStop = Twist(Vector3(0,0,0), Vector3(0,0,0))
+metersPerCount = 0.038*np.pi/600 #0.038 m diameter of treads * pi / 600 encoder counts per revolution
+DRIFT_SCALE = 0.0
 
 class RingBuffer():
     def __init__(self, size):
@@ -47,22 +42,36 @@ class RingBuffer():
     def getAvg(self):
         return np.average(self.get())
 
+global ctrl_output
+global encoder_output
+global is_enabled
+global drift_left
+
+ctrl_output = [0.0, 0.0]
+encoder_output = [RingBuffer(5), RingBuffer(5)]
+is_enabled = False
+drift_left = 0.0
 
 def make_differentiator(pub, N, scale, idx):
     posFilter = RingBuffer(N)
 
     def differentiator(msg):
         global encoder_output
-        encoder_output[idx] = msg.data
+        global drift_left
 
-        metersPerCount = 0.038*np.pi/600 #0.038 m diameter of treads * pi / 600 encoder counts per revolution
-        encoderCount = scale*msg.data
-        metersTraveled = encoderCount*metersPerCount
+        # Drift correction
+        encoder_output[idx].push(scale*msg.data)
+        if encoder_output[0].isFull() and encoder_output[1].isFull():
+        	drift_left += encoder_output[0].getAvg() - encoder_output[1].getAvg()
+
+        # ticks --> meters conversion
+        metersTraveled = scale*msg.data*metersPerCount
 
         posFilter.push((metersTraveled, rospy.Time.now().to_sec()))
         if not posFilter.filled():
             return
 
+        # Velocity calculation
         encoderVals = posFilter.get()
         velocityEst = 0
         # This could be better filtered
@@ -120,6 +129,7 @@ def init():
     global ctrl_output
     global encoder_output
     global is_enabled
+    global drift_left
 
     print("Initializing ZumyReader... ")
     rospy.init_node("zumy_reader")
@@ -158,7 +168,7 @@ def init():
         # How to convert motor velocities to twist? Have an idea if we can bypass PID....
         if is_enabled:
             trans = Vector3(ctrl_output[0], 0, 0)
-            rot = Vector3(0, 0, 0)
+            rot = Vector3(drift_left*DRIFT_SCALE, 0, 0)
             motor_pub.publish(Twist(trans, rot))
 
         rate.sleep()
