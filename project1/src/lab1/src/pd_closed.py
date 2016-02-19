@@ -33,32 +33,32 @@ def command(ar_tags):
     listener = tf.TransformListener()
     zumy_vel = rospy.Publisher("/zumy7a/cmd_vel", Twist, queue_size=10)
     zumyctrl_enable = rospy.Publisher("/zumy_ctrl/enable", Bool, queue_size=10)
-    zumyctrl_setpoint_l = rospy.Publisher('/zumy_ctrl/l_setpoint', Float64, queue_size=10)
-    zumyctrl_setpoint_r = rospy.Publisher('/zumy_ctrl/r_setpoint', Float64, queue_size=10)
+    zumyctrl_setpoint = rospy.Publisher('/zumy_ctrl/setpoint', Float64, queue_size=10)
+    # zumyctrl_setpoint_r = rospy.Publisher('/zumy_ctrl/r_setpoint', Float64, queue_size=10)
 
-    zumyctrl_setpoint_r.publish(0.6)
-    zumyctrl_setpoint_l.publish(0.9)
+    zumyctrl_setpoint.publish(0.05)
+    # zumyctrl_setpoint_l.publish(0.9)
     zumyctrl_enable.publish(False)
     pid_enabled = False
 
     r = rospy.Rate(10)
-    zumy = 0
-    target = [1, 2, 4]
-    targetidx = 0
+    targetidx = 1
     print 'Ready to Move'
 
     # while (target<len(ar_tags)):
-    while targetidx < len(target) and not rospy.is_shutdown():
+    while targetidx < len(ar_tags) and not rospy.is_shutdown():
         while not rospy.is_shutdown():
             try:
-                trans,rot = listener.lookupTransform(ar_tags['ar'+str(zumy)], ar_tags['ar'+str(target[targetidx])], rospy.Time(0))
+                trans,rot = listener.lookupTransform('ar_marker_'+str(ar_tags[0]),
+                                                     'ar_marker_'+str(ar_tags[targetidx]), 
+                                                      rospy.Time(0))
                 # print trans
             except:
-                # print 'Failed to get Transforms'
+                print 'Failed to get Transforms: '+str(ar_tags[targetidx])
                 r.sleep()
                 continue
             # FACE THE ARTAG
-            # print 'Transforms Acquired'
+            print 'Transforms Acquired'
             if (checkRThresh(trans,rot)):
                 if (checkTThresh(trans,rot)):
                     print 'Arrived'
@@ -81,12 +81,10 @@ def command(ar_tags):
                 print 'Rotating'
                 if pid_enabled:
                     zumyctrl_enable.publish(False)
-                    zumy_vel.publish(zumy_stop)
                     pid_enabled = False
 
                 zumy_vel.publish(Twist(Vector3(0,0,0),Vector3(0,0,-0.2))) #slowly turn to face the goal AR tag
 
-            break
             r.sleep()
 
 
@@ -114,9 +112,9 @@ def main():
     # if len(sys.argv) < 3:
     #     print "Use: pd.py [AR tag number for Zumy][AR tag number for goal]"
     #     sys.exit()
-    ar_tags = {}
+    ar_tags = []
     for i in range(1,len(sys.argv)):
-        ar_tags['ar'+str(sys.argv[i])] = 'ar_marker_' + sys.argv[i]
+        ar_tags.append(sys.argv[i])
         # Tell the zumy to move
     print 'ar tags loaded'
     command(ar_tags)
