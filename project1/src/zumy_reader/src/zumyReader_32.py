@@ -10,7 +10,7 @@ from geometry_msgs.msg import *
 
 zumyStop = Twist(Vector3(0,0,0), Vector3(0,0,0))
 metersPerCount = 0.038*np.pi/600 #0.038 m diameter of treads * pi / 600 encoder counts per revolution
-DRIFT_SCALE = -0.000001
+DRIFT_SCALE = 0.0000005
 
 class RingBuffer():
     def __init__(self, size):
@@ -48,7 +48,7 @@ global is_enabled
 global drift_left
 
 ctrl_output = [0.0, 0.0]
-encoder_output = [RingBuffer(5), RingBuffer(5)]
+encoder_output = [RingBuffer(3), RingBuffer(3)]
 is_enabled = False
 drift_left = 0.0
 
@@ -147,8 +147,8 @@ def init():
 
     print("Initializing ZumyReader subscribers... ")
     # Convert encoder ticks to velocity, pass to PID
-    rospy.Subscriber('/zumy7a/l_enc', Int32, make_differentiator(left_state_pub, 5, 1, 0))
-    rospy.Subscriber('/zumy7a/r_enc', Int32, make_differentiator(right_state_pub, 5, -1, 1))
+    rospy.Subscriber('/zumy7a/l_enc', Int32, make_differentiator(left_state_pub, 3, 1, 0))
+    rospy.Subscriber('/zumy7a/r_enc', Int32, make_differentiator(right_state_pub, 3, -1, 1))
 
     # Pass enable flag along to PID directly
     rospy.Subscriber('/zumy_ctrl/enable', Bool, make_enable_listener(left_enable_pub, right_enable_pub, motor_pub))

@@ -16,14 +16,14 @@ zumy_stop = Twist(Vector3(0,0,0),Vector3(0,0,0))
 
 # Check if Zumy is close enought to target position and rotation
 def checkTThresh(trans, rot):
-    tthresh = .35
+    tthresh = .4
     for i in range(2):
         if np.abs(trans[i])>tthresh:
             return False
     return True
 
 def checkRThresh(trans, rot):
-    rthresh = .3
+    rthresh = .15
     if trans[0] > 0 and abs(trans[1]) < rthresh:
         return True
     return False
@@ -61,10 +61,10 @@ def command(ar_tags):
                     targetidx += 1
                     break
                 else:
-                    zumy_vel.publish(Twist(Vector3(0.15,0,0),Vector3(0,0,0))) #slowly go to the goal tag
+                    zumy_vel.publish(Twist(Vector3(0.1,0,0),Vector3(0,0,0))) #slowly go to the goal tag
                     print 'Translating'
             else:
-                zumy_vel.publish(Twist(Vector3(0,0,0),Vector3(0,0,-0.2))) #slowly turn to face the goal AR tag
+                zumy_vel.publish(Twist(Vector3(0,0,0),Vector3(0,0,-0.16))) #slowly turn to face the goal AR tag
                 print 'Rotating'
 
             break

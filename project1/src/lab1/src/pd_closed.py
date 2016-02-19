@@ -3,6 +3,7 @@ import tf
 import sys
 import math
 import numpy as np
+import time
 import rospy
 from tf2_msgs.msg import TFMessage
 from std_msgs.msg import Int16, Bool, Float64
@@ -16,14 +17,14 @@ zumy_stop = Twist(Vector3(0,0,0),Vector3(0,0,0))
 
 # Check if Zumy is close enought to target position and rotation
 def checkTThresh(trans, rot):
-    tthresh = .35
+    tthresh = .3
     for i in range(2):
         if np.abs(trans[i])>tthresh:
             return False
     return True
 
 def checkRThresh(trans, rot):
-    rthresh = .3
+    rthresh = .25
     if trans[0] > 0 and abs(trans[1]) < rthresh:
         return True
     return False
@@ -35,8 +36,8 @@ def command(ar_tags):
     zumyctrl_enable = rospy.Publisher("/zumy_ctrl/enable", Bool, queue_size=10)
     zumyctrl_setpoint = rospy.Publisher('/zumy_ctrl/setpoint', Float64, queue_size=10)
     # zumyctrl_setpoint_r = rospy.Publisher('/zumy_ctrl/r_setpoint', Float64, queue_size=10)
-
-    zumyctrl_setpoint.publish(0.05)
+    time.sleep(3)
+    zumyctrl_setpoint.publish(0.15)
     # zumyctrl_setpoint_l.publish(0.9)
     zumyctrl_enable.publish(False)
     pid_enabled = False
@@ -83,7 +84,7 @@ def command(ar_tags):
                     zumyctrl_enable.publish(False)
                     pid_enabled = False
 
-                zumy_vel.publish(Twist(Vector3(0,0,0),Vector3(0,0,-0.2))) #slowly turn to face the goal AR tag
+                zumy_vel.publish(Twist(Vector3(0,0,0),Vector3(0,0,0.18))) #slowly turn to face the goal AR tag
 
             r.sleep()
 
