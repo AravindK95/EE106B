@@ -33,7 +33,14 @@ def command(ar_tags):
     listener = tf.TransformListener()
     zumy_vel = rospy.Publisher("/zumy7a/cmd_vel", Twist, queue_size=10)
     zumyctrl_enable = rospy.Publisher("/zumy_ctrl/enable", Bool, queue_size=10)
-    zumyctrl_setpoint = rospy.Publisher("/zumy_ctrl/setpoint", Float64, queue_size=10)
+    zumyctrl_setpoint_l = rospy.Publisher('/zumy_ctrl/l_setpoint', Float64, queue_size=10)
+    zumyctrl_setpoint_r = rospy.Publisher('/zumy_ctrl/r_setpoint', Float64, queue_size=10)
+
+    zumyctrl_setpoint_r.publish(0.6)
+    zumyctrl_setpoint_l.publish(0.9)
+    zumyctrl_enable.publish(False)
+    pid_enabled = False
+
     r = rospy.Rate(10)
     zumy = 0
     target = [1, 2, 4]
@@ -45,27 +52,39 @@ def command(ar_tags):
         while not rospy.is_shutdown():
             try:
                 trans,rot = listener.lookupTransform(ar_tags['ar'+str(zumy)], ar_tags['ar'+str(target[targetidx])], rospy.Time(0))
-                # (trans,rot) = listener.lookupTransform('ar_marker_0', 'ar_marker_1', rospy.Time(0))
-                print trans
+                # print trans
             except:
-                print 'Failed to get Transforms'
+                # print 'Failed to get Transforms'
                 r.sleep()
                 continue
             # FACE THE ARTAG
-            print 'Transforms Acquired'
+            # print 'Transforms Acquired'
             if (checkRThresh(trans,rot)):
                 if (checkTThresh(trans,rot)):
-                    zumyctrl_enable.publish(False)
-                    zumy_vel.publish(zumy_stop)
                     print 'Arrived'
+                    if pid_enabled:
+                        zumyctrl_enable.publish(False)
+                        pid_enabled = False
+
+                    zumy_vel.publish(zumy_stop)
                     targetidx += 1
                     break
                 else:
-                    zumy_vel.publish(Twist(Vector3(0.15,0,0),Vector3(0,0,0))) #slowly go to the goal tag
                     print 'Translating'
+                    if not pid_enabled:
+                        # zumy_vel.publish(zumy_stop)
+                        zumyctrl_enable.publish(True)
+                        pid_enabled = True
+
+                    # zumy_vel.publish(Twist(Vector3(0.15,0,0),Vector3(0,0,0))) #slowly go to the goal tag
             else:
-                zumy_vel.publish(Twist(Vector3(0,0,0),Vector3(0,0,-0.2))) #slowly turn to face the goal AR tag
                 print 'Rotating'
+                if pid_enabled:
+                    zumyctrl_enable.publish(False)
+                    zumy_vel.publish(zumy_stop)
+                    pid_enabled = False
+
+                zumy_vel.publish(Twist(Vector3(0,0,0),Vector3(0,0,-0.2))) #slowly turn to face the goal AR tag
 
             break
             r.sleep()
