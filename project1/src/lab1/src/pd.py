@@ -29,7 +29,7 @@ def command(ar_tags):
             trans,rot = listener.lookupTransform(ar_tags['ar1'], ar_tags['arZ'], rospy.Time(0))
         except:
             continue
-        if (TRESHOLD_FROM_TAG):
+        if (THRESHOLD_FROM_TAG):
             zumy_vel.publish(zumy_stop)
         zumy_vel.publish(Vector3(0,0,0),Vector3(0,0,.2)) #slowly turn to face the goal AR tag
         r.sleep()
@@ -40,7 +40,7 @@ def command(ar_tags):
     while not rospy.is_shutdown():
         thresh = 
 
-        if (TRESHOLD_FROM_TAG):
+        if (THRESHOLD_FROM_TAG):
             zumyctrl_enable.publish(False)
             zumy_vel.publish(zumy_stop)
 
