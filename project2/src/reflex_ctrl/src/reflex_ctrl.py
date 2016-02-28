@@ -1,11 +1,14 @@
+#!/usr/bin/env python
 import sys
 import rospy
 import roslib
 from reflex_sf_msgs.msg import SFPose
 
 
-presets = {'o':(0.0, 0.0, 0.0),
-           'c':(3.5, 3.5, 3.5)}
+presets = {
+    'o' : (0.0, 0.0, 0.0),
+    'c' : (3.5, 3.5, 3.5)
+}
 
 def main():
     rospy.init_node("reflex_ctrl")
