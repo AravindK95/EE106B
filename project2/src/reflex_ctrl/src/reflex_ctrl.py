@@ -7,7 +7,8 @@ from reflex_sf_msgs.msg import SFPose
 
 presets = {
     'o' : (0.0, 0.0, 0.0),
-    'c' : (3.5, 3.5, 3.5)
+    'c' : (3.5, 3.5, 3.5),
+    'c2': (3.5, 3.5, 0.0)
 }
 
 def main():
