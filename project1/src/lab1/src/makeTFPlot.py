@@ -14,7 +14,7 @@ import time
 
 def make_plot(name):
     fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(111)
 
     f = open(name+'.txt', 'r')
     data = f.read()
@@ -31,14 +31,14 @@ def make_plot(name):
             continue
         x[i] = data_tuple[0]
         y[i] = data_tuple[1]
-        z[i] = data_tuple[2]
+        # z[i] = data_tuple[2]
 
     f.close()
 
-    ax.scatter(x, y, z)
+    ax.scatter(x, y)
     ax.set_xlabel('x')
     ax.set_ylabel('y')
-    ax.set_zlabel('z')
+    # ax.set_zlabel('z')
     plt.show()
     rospy.spin()
 
