@@ -4,6 +4,7 @@ sys.path.append('/home/ee106/ee106b/project3/src/lab3/src/lab3')
 import numpy as np
 import obj_file
 import transformations
+import fc
 
 SPRAY_BOTTLE_MESH_FILENAME = '/home/ee106/ee106b/project3/src/lab3/data/spray.obj'
 
@@ -41,7 +42,32 @@ if __name__ == '__main__':
     print 'Num triangles:', len(triangles)
     print 'Num normals:', len(normals)
 
+    pairs = []
+
     # 1. Generate candidate pairs of contact points
+    for i in range(len(vertices)):
+        for j in range(i, len(vertices)):
+            pairs.append((i, j))
+    print len(pairs)
+
+    c = np.zeros((3, 2))
+    n = np.zeros((3, 2))
+    successful = []
+    for i, j in pairs:
+        print(i, j)
+        v1, v2 = vertices[i], vertices[j]
+        n1, n2 = normals[i], normals[j]
+
+        c[:, 0] = v1
+        c[:, 1] = v2
+        n[:, 0] = n1
+        n[:, 1] = n2
+
+        retval = fc.force_closure(c, n, 0, 0.5, 0)
+
+        if retval: 
+            print str(retval)+": "+str(c)
+            successful.append((c, i, j))
 
     # 2. Check for force closure
 
