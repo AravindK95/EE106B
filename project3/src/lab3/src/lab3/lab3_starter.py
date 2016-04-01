@@ -1,12 +1,17 @@
+#!/usr/bin/env python
 import sys
-sys.path.append('/home/ee106/ee106b/project3/src/lab3/src/lab3')
-
+import rospkg
 import numpy as np
+
+PROJECT_PATH = rospkg.RosPack().get_path('lab3')
+sys.path.append(PROJECT_PATH+'/src/lab3')
+sys.path.append(PROJECT_PATH+'/src/extra')
+SPRAY_BOTTLE_MESH_FILENAME = PROJECT_PATH+'/data/spray.obj'
+
 import obj_file
 import transformations
 import fc
 
-SPRAY_BOTTLE_MESH_FILENAME = '/home/ee106/ee106b/project3/src/lab3/data/spray.obj'
 
 def contacts_to_baxter_hand_pose(contact1, contact2):
     c1 = np.array(contact1)
@@ -42,14 +47,17 @@ if __name__ == '__main__':
     print 'Num triangles:', len(triangles)
     print 'Num normals:', len(normals)
 
-    pairs = []
 
     # 1. Generate candidate pairs of contact points
+    pairs = []
+    print "Generating point-pairs"
     for i in range(len(vertices)):
         for j in range(i, len(vertices)):
             pairs.append((i, j))
-    print len(pairs)
+    print "Total pairs: "+str(len(pairs))
 
+    # 2. Check for force closure
+    print "Checking for force closure ..."
     c = np.zeros((3, 2))
     n = np.zeros((3, 2))
     successful = []
@@ -64,12 +72,15 @@ if __name__ == '__main__':
         n[:, 1] = n2
 
         retval = fc.force_closure(c, n, 0, 0.5, 0)
+        if retval: successful.append((i, j))
 
-        if retval: 
-            print str(retval)+": "+str(c)
-            successful.append((c, i, j))
-
-    # 2. Check for force closure
+    print "Found pairs: "
+    print successful
+    of = open(PROJECT_PATH+'/data/points.csv', 'w')
+    of.write('i, j\n')
+    for i, j in successful:
+        of.write(str(i)+', '+str(j)+'\n')
+    of.close()
 
     # 3. Convert each grasp to a hand pose
     contact1 = vertices[0]
