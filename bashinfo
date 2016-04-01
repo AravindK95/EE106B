@@ -1,0 +1,20 @@
+#!/bin/less
+
+# Copy the necessary info into your bashrc
+# Remember to change the username and project path to suit your machine
+
+# Aliases
+alias getsource='subl ~/.bashrc'
+alias resource='source ~/.bashrc'
+alias naut='nautilus'
+
+
+# ROS info
+ROS_USERNAME=ee106
+ROS_PROJECT_WS=~/ee106b/project3
+
+export ROS_MASTER_URI=http://robotbaxter.local:11311
+source /opt/ros/indigo/setup.bash
+export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:$ROS_PROJECT_WS
+source $ROS_PROJECT_WS/devel/setup.bash
+export ROS_HOSTNAME=pepper.local
