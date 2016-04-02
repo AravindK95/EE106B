@@ -4,8 +4,9 @@ import rospkg
 import rospy
 import tf
 import numpy as np
-from lab3.msg import FrameCall
+from std_msgs.msg import String
 from geometry_msgs.msg import Transform
+from lab3.msg import FrameCall
 
 PROJECT_PATH = rospkg.RosPack().get_path('lab3')
 sys.path.append(PROJECT_PATH+'/src/lab3')
@@ -13,12 +14,18 @@ sys.path.append(PROJECT_PATH+'/src/extra')
 
 import transformations
 
-DUMMY_TRANSFORM = Transform((0,0,0), (0,0,0,0))
+def publish_frame_group(trans, rot, name, base, to_add):
+    tf_pub.publish(Transform(trans, rot), name, base, True)
+
+    ### TODO: calculate pre- and post- trans & rot values
+    tf_pub.publish(Transform(pre_trans, pre_rot), 'pre'+name, base, True)
+    tf_pub.publish(Transform(post_trans, post_rot), 'post'+name, base, True)
+
 
 if __name__ == '__main__':
     rospy.init_node('grasp_ctrl')
     tf_pub = rospy.Publisher('lab3/tf', FrameCall, queue_size=3)
-    # moveit_pub = rospy.Publisher('lab3/moveit', SOMEMSGTYPE, queue_size=3)
+    moveit_pub = rospy.Publisher('lab3/moveit', String, queue_size=3)
 
     while not rospy.is_shutdown():
         # parse input
@@ -32,7 +39,7 @@ if __name__ == '__main__':
             continue
 
         if cmd == 'addframe':
-            # publish frame
+            # publish grasp frame
             """Example input: 
                $ cmd >> addframe (1,2,3) (4,5,6,7) child base
             """
@@ -41,15 +48,17 @@ if __name__ == '__main__':
             name = inval[3]
             base = inval[4]
 
-            tf_pub.publish(Transform(trans, rot), name, base, True)
+            publish_frame_group(trans, rot, name, base, True)
 
         elif cmd == 'rmframe':
-            # stop publishing frame 
+            # stop publishing grasp frame 
             """Example input: 
                $ cmd >> rmframe child
             """
             name = inval[1]
-            tf_pub.publish(DUMMY_TRANSFORM, name, 'blah', False)
+
+            # trans and rot values irrelevant
+            publish_frame_group((0,0,0), (0,0,0,0), name, 'blah', False)
 
         elif cmd == 'moveto':
             # command moveit
@@ -57,7 +66,10 @@ if __name__ == '__main__':
                $ cmd >> moveto child
             """
             name = inval[1]
-            # moveit_pub.publish(name)
+
+            ## TODO: figure out ingterface with moveit ctrl. Or just do
+            ## moveit control in this file
+            moveit_pub.publish(name)
 
         else:
             print 'Bad command: '+inval[0]
