@@ -27,11 +27,13 @@ struct FrameCall_
   FrameCall_()
     : rbt()
     , name()
+    , base()
     , to_add(false)  {
     }
   FrameCall_(const ContainerAllocator& _alloc)
     : rbt(_alloc)
     , name(_alloc)
+    , base(_alloc)
     , to_add(false)  {
     }
 
@@ -42,6 +44,9 @@ struct FrameCall_
 
    typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _name_type;
   _name_type name;
+
+   typedef std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other >  _base_type;
+  _base_type base;
 
    typedef uint8_t _to_add_type;
   _to_add_type to_add;
@@ -123,12 +128,12 @@ struct MD5Sum< ::lab3::FrameCall_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "dd65101815e67ba4d73d834625689ad5";
+    return "52867b31fea01dd7c031cb7ad83ba271";
   }
 
   static const char* value(const ::lab3::FrameCall_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xdd65101815e67ba4ULL;
-  static const uint64_t static_value2 = 0xd73d834625689ad5ULL;
+  static const uint64_t static_value1 = 0x52867b31fea01dd7ULL;
+  static const uint64_t static_value2 = 0xc031cb7ad83ba271ULL;
 };
 
 template<class ContainerAllocator>
@@ -149,8 +154,8 @@ struct Definition< ::lab3::FrameCall_<ContainerAllocator> >
   {
     return "geometry_msgs/Transform rbt\n\
 string name\n\
+string base\n\
 bool to_add\n\
-\n\
 \n\
 ================================================================================\n\
 MSG: geometry_msgs/Transform\n\
@@ -194,6 +199,7 @@ namespace serialization
     {
       stream.next(m.rbt);
       stream.next(m.name);
+      stream.next(m.base);
       stream.next(m.to_add);
     }
 
@@ -218,6 +224,8 @@ struct Printer< ::lab3::FrameCall_<ContainerAllocator> >
     Printer< ::geometry_msgs::Transform_<ContainerAllocator> >::stream(s, indent + "  ", v.rbt);
     s << indent << "name: ";
     Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.name);
+    s << indent << "base: ";
+    Printer<std::basic_string<char, std::char_traits<char>, typename ContainerAllocator::template rebind<char>::other > >::stream(s, indent + "  ", v.base);
     s << indent << "to_add: ";
     Printer<uint8_t>::stream(s, indent + "  ", v.to_add);
   }

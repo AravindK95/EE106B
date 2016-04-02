@@ -11,13 +11,16 @@ frame_dict = {}
 
 def handle_call(data):
     if data.to_add:
-        frame_dict[data.name] = ((data.rbt.translation.x, 
-                                  data.rbt.translation.y, 
-                                  data.rbt.translation.z), 
-                                 (data.rbt.rotation.x, 
-                                  data.rbt.rotation.y, 
-                                  data.rbt.rotation.z, 
-                                  data.rbt.rotation.w ))
+        rbt = ((data.rbt.translation.x, 
+                data.rbt.translation.y, 
+                data.rbt.translation.z), 
+               (data.rbt.rotation.x, 
+                data.rbt.rotation.y, 
+                data.rbt.rotation.z, 
+                data.rbt.rotation.w))
+
+        frame_dict[name] = rbt
+
     else:
         remove_frame(data.name)
 

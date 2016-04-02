@@ -17,6 +17,11 @@
     :initarg :name
     :type cl:string
     :initform "")
+   (base
+    :reader base
+    :initarg :base
+    :type cl:string
+    :initform "")
    (to_add
     :reader to_add
     :initarg :to_add
@@ -42,6 +47,11 @@
   (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader lab3-msg:name-val is deprecated.  Use lab3-msg:name instead.")
   (name m))
 
+(cl:ensure-generic-function 'base-val :lambda-list '(m))
+(cl:defmethod base-val ((m <FrameCall>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader lab3-msg:base-val is deprecated.  Use lab3-msg:base instead.")
+  (base m))
+
 (cl:ensure-generic-function 'to_add-val :lambda-list '(m))
 (cl:defmethod to_add-val ((m <FrameCall>))
   (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader lab3-msg:to_add-val is deprecated.  Use lab3-msg:to_add instead.")
@@ -55,6 +65,12 @@
     (cl:write-byte (cl:ldb (cl:byte 8 16) __ros_str_len) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 24) __ros_str_len) ostream))
   (cl:map cl:nil #'(cl:lambda (c) (cl:write-byte (cl:char-code c) ostream)) (cl:slot-value msg 'name))
+  (cl:let ((__ros_str_len (cl:length (cl:slot-value msg 'base))))
+    (cl:write-byte (cl:ldb (cl:byte 8 0) __ros_str_len) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 8) __ros_str_len) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 16) __ros_str_len) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 24) __ros_str_len) ostream))
+  (cl:map cl:nil #'(cl:lambda (c) (cl:write-byte (cl:char-code c) ostream)) (cl:slot-value msg 'base))
   (cl:write-byte (cl:ldb (cl:byte 8 0) (cl:if (cl:slot-value msg 'to_add) 1 0)) ostream)
 )
 (cl:defmethod roslisp-msg-protocol:deserialize ((msg <FrameCall>) istream)
@@ -68,6 +84,14 @@
       (cl:setf (cl:slot-value msg 'name) (cl:make-string __ros_str_len))
       (cl:dotimes (__ros_str_idx __ros_str_len msg)
         (cl:setf (cl:char (cl:slot-value msg 'name) __ros_str_idx) (cl:code-char (cl:read-byte istream)))))
+    (cl:let ((__ros_str_len 0))
+      (cl:setf (cl:ldb (cl:byte 8 0) __ros_str_len) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 8) __ros_str_len) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 16) __ros_str_len) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 24) __ros_str_len) (cl:read-byte istream))
+      (cl:setf (cl:slot-value msg 'base) (cl:make-string __ros_str_len))
+      (cl:dotimes (__ros_str_idx __ros_str_len msg)
+        (cl:setf (cl:char (cl:slot-value msg 'base) __ros_str_idx) (cl:code-char (cl:read-byte istream)))))
     (cl:setf (cl:slot-value msg 'to_add) (cl:not (cl:zerop (cl:read-byte istream))))
   msg
 )
@@ -79,20 +103,21 @@
   "lab3/FrameCall")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<FrameCall>)))
   "Returns md5sum for a message object of type '<FrameCall>"
-  "dd65101815e67ba4d73d834625689ad5")
+  "52867b31fea01dd7c031cb7ad83ba271")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'FrameCall)))
   "Returns md5sum for a message object of type 'FrameCall"
-  "dd65101815e67ba4d73d834625689ad5")
+  "52867b31fea01dd7c031cb7ad83ba271")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<FrameCall>)))
   "Returns full string definition for message of type '<FrameCall>"
-  (cl:format cl:nil "geometry_msgs/Transform rbt~%string name~%bool to_add~%~%~%================================================================================~%MSG: geometry_msgs/Transform~%# This represents the transform between two coordinate frames in free space.~%~%Vector3 translation~%Quaternion rotation~%~%================================================================================~%MSG: geometry_msgs/Vector3~%# This represents a vector in free space. ~%~%float64 x~%float64 y~%float64 z~%================================================================================~%MSG: geometry_msgs/Quaternion~%# This represents an orientation in free space in quaternion form.~%~%float64 x~%float64 y~%float64 z~%float64 w~%~%~%"))
+  (cl:format cl:nil "geometry_msgs/Transform rbt~%string name~%string base~%bool to_add~%~%================================================================================~%MSG: geometry_msgs/Transform~%# This represents the transform between two coordinate frames in free space.~%~%Vector3 translation~%Quaternion rotation~%~%================================================================================~%MSG: geometry_msgs/Vector3~%# This represents a vector in free space. ~%~%float64 x~%float64 y~%float64 z~%================================================================================~%MSG: geometry_msgs/Quaternion~%# This represents an orientation in free space in quaternion form.~%~%float64 x~%float64 y~%float64 z~%float64 w~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'FrameCall)))
   "Returns full string definition for message of type 'FrameCall"
-  (cl:format cl:nil "geometry_msgs/Transform rbt~%string name~%bool to_add~%~%~%================================================================================~%MSG: geometry_msgs/Transform~%# This represents the transform between two coordinate frames in free space.~%~%Vector3 translation~%Quaternion rotation~%~%================================================================================~%MSG: geometry_msgs/Vector3~%# This represents a vector in free space. ~%~%float64 x~%float64 y~%float64 z~%================================================================================~%MSG: geometry_msgs/Quaternion~%# This represents an orientation in free space in quaternion form.~%~%float64 x~%float64 y~%float64 z~%float64 w~%~%~%"))
+  (cl:format cl:nil "geometry_msgs/Transform rbt~%string name~%string base~%bool to_add~%~%================================================================================~%MSG: geometry_msgs/Transform~%# This represents the transform between two coordinate frames in free space.~%~%Vector3 translation~%Quaternion rotation~%~%================================================================================~%MSG: geometry_msgs/Vector3~%# This represents a vector in free space. ~%~%float64 x~%float64 y~%float64 z~%================================================================================~%MSG: geometry_msgs/Quaternion~%# This represents an orientation in free space in quaternion form.~%~%float64 x~%float64 y~%float64 z~%float64 w~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <FrameCall>))
   (cl:+ 0
      (roslisp-msg-protocol:serialization-length (cl:slot-value msg 'rbt))
      4 (cl:length (cl:slot-value msg 'name))
+     4 (cl:length (cl:slot-value msg 'base))
      1
 ))
 (cl:defmethod roslisp-msg-protocol:ros-message-to-list ((msg <FrameCall>))
@@ -100,5 +125,6 @@
   (cl:list 'FrameCall
     (cl:cons ':rbt (rbt msg))
     (cl:cons ':name (name msg))
+    (cl:cons ':base (base msg))
     (cl:cons ':to_add (to_add msg))
 ))
