@@ -71,10 +71,10 @@ def main():
     right_arm.set_planning_time(10)
 
     #make subscriber to position topic
-    rospySubscriber("new_position", Pose, move_arm)
+    rospySubscriber('new_position', Pose, move_arm)
 
     #make subscriber to gripper topic
-    rospySubscriber("gripper_control", Bool, actuate_gripper)
+    rospySubscriber('gripper_control', Bool, actuate_gripper)
 
     rospy.spin()
 
