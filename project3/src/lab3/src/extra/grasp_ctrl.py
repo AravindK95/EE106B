@@ -11,17 +11,30 @@ from lab3.msg import FrameCall
 PROJECT_PATH = rospkg.RosPack().get_path('lab3')
 sys.path.append(PROJECT_PATH+'/src/lab3')
 sys.path.append(PROJECT_PATH+'/src/extra')
+SPRAY_BOTTLE_MESH_FILENAME = PROJECT_PATH+'/data/spray.obj'
 
+import obj_file
 import transformations
+from lab3_starter import contacts_to_baxter_hand_pose
+
+BASE = 'base'
+OBJ_BASE = 'graspable_object'
 
 def publish_frame_group(trans, rot, name, base, to_add):
     tf_pub.publish(Transform(trans, rot), name, base, True)
 
     ### TODO: calculate pre- and post- trans & rot values
-    tf_pub.publish(Transform(pre_trans, pre_rot), 'pre'+name, base, True)
-    tf_pub.publish(Transform(post_trans, post_rot), 'post'+name, base, True)
+    #tf_pub.publish(Transform(pre_trans, pre_rot), 'pre'+name, base, True)
+    #tf_pub.publish(Transform(post_trans, post_rot), 'post'+name, base, True)
 
 if __name__ == '__main__':
+    of = obj_file.ObjFile(SPRAY_BOTTLE_MESH_FILENAME)
+    mesh = of.read()
+
+    vertices = mesh.vertices
+    triangles = mesh.triangles
+    normals = mesh.normals
+
     rospy.init_node('grasp_ctrl')
 
     tf_pub = rospy.Publisher('lab3/tf', FrameCall, queue_size=3)
@@ -73,12 +86,25 @@ if __name__ == '__main__':
             moveit_pub.publish(Pose(trans,rot))
 
         elif cmd == 'setclaw':
-            # command moveit
+            # command the end effector
             """Example input: 
                $ cmd >> setclaw True 
             """
             claw_bool = eval(inval[1])
             moveit_pub.publish(claw_bool)
+
+        elif cmd == 'makepose':
+            # turn two force closure vertices into a tf frame
+            """Example input:
+               $ cmd >> makepose name 2473 2035
+            """
+            name = inval[1]
+            idx1 = int(inval[2])
+            idx2 = int(inval[3])
+            trans,rot = contacts_to_baxter_hand_pose(vertices[idx1], vertices[idx2])
+            trans = tuple(trans[0], trans[1], trans[2])
+            rot = tuple(rot[0], rot[1], rot[2], rot[3])
+            publish_frame_group(trans, rot, name, OBJ_BASE, True)
 
         else:
             print 'Bad command: '+inval[0]
