@@ -19,7 +19,7 @@ def handle_call(data):
                 data.rbt.rotation.z, 
                 data.rbt.rotation.w))
 
-        frame_dict[name] = rbt
+        frame_dict[data.name] = rbt
 
     else:
         remove_frame(data.name)

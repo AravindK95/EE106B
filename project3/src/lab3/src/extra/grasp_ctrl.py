@@ -5,7 +5,7 @@ import rospy
 import tf
 import numpy as np
 from std_msgs.msg import String, Bool
-from geometry_msgs.msg import Transform, Pose
+from geometry_msgs.msg import Transform, Pose, Vector3, Quaternion, Point
 from lab3.msg import FrameCall
 
 PROJECT_PATH = rospkg.RosPack().get_path('lab3')
@@ -21,7 +21,11 @@ BASE = 'base'
 OBJ_BASE = 'graspable_object'
 
 def publish_frame_group(trans, rot, name, base, to_add):
-    tf_pub.publish(Transform(trans, rot), name, base, True)
+    tf_pub.publish(Transform(Vector3(trans[0], trans[1], trans[2]), 
+                             Quaternion(rot[0], rot[1], rot[2], rot[3])), 
+                   name, 
+                   base, 
+                   to_add)
 
     ### TODO: calculate pre- and post- trans & rot values
     #tf_pub.publish(Transform(pre_trans, pre_rot), 'pre'+name, base, True)
@@ -82,8 +86,9 @@ if __name__ == '__main__':
                $ cmd >> moveto child
             """
             name = inval[1]
-            (trans,rot) = tf_listener.lookupTranform(name, BASE, rospy.Time(0))
-            moveit_pub.publish(Pose(trans,rot))
+            (trans,rot) = tf_listener.lookupTransform(name, BASE, rospy.Time(0))
+            moveit_pub.publish(Pose(Point(trans[0], trans[1], trans[2]),
+                                    Quaternion(rot[0], rot[1], rot[2], rot[3])))
 
         elif cmd == 'setclaw':
             # command the end effector
@@ -91,7 +96,7 @@ if __name__ == '__main__':
                $ cmd >> setclaw True 
             """
             claw_bool = eval(inval[1])
-            moveit_pub.publish(claw_bool)
+            claw_pub.publish(claw_bool)
 
         elif cmd == 'makepose':
             # turn two force closure vertices into a tf frame
@@ -102,8 +107,8 @@ if __name__ == '__main__':
             idx1 = int(inval[2])
             idx2 = int(inval[3])
             trans,rot = contacts_to_baxter_hand_pose(vertices[idx1], vertices[idx2])
-            trans = tuple(trans[0], trans[1], trans[2])
-            rot = tuple(rot[0], rot[1], rot[2], rot[3])
+            trans = (trans[0], trans[1], trans[2])
+            rot = (rot[0], rot[1], rot[2], rot[3])
             publish_frame_group(trans, rot, name, OBJ_BASE, True)
 
         else:
