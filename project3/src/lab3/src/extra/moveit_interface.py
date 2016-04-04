@@ -31,8 +31,6 @@ def move_arm(data):
     #Set the start state for the left arm
     left_arm.set_start_state_to_current_state()
 
-    rospy.sleep(1.0)
-
     print('Planning Trajectory')
     #generate trajectory for target pose
     left_trajectory = left_arm.plan()

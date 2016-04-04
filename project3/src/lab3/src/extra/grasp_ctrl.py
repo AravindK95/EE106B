@@ -27,18 +27,18 @@ def publish_frame_group(trans, rot, name, base, to_add):
                    base, 
                    to_add)
     #One of these is the correct direction to off set grap pos by.
-    pre_trans = Vector3(trans[0], trans[1] + 0.5, trans[2])
+    pre_trans = Vector3(trans[0] - 0.2, trans[1], trans[2])
     pre_rot = Quaternion(rot[0], rot[1], rot[2], rot[3])
 
     #One of these is the correct direction to lift it straight up. Probably z.
-    post_trans = Vector3(trans[0], trans[1], trans[2] + 0.5)
+    post_trans = Vector3(trans[0], trans[1], trans[2] + 0.3)
     post_rot = Quaternion(rot[0], rot[1], rot[2], rot[3])
     #We want to the post orientation to be the same as the initial orientation during grasp
     #so we do not need to change orientation of end effector.
 
     #Publish the pre and post trans
-    tf_pub.publish(Transform(pre_trans, pre_rot), 'pre'+name, base, True)
-    tf_pub.publish(Transform(post_trans, post_rot), 'post'+name, base, True)
+    tf_pub.publish(Transform(pre_trans, pre_rot), 'pre'+name, base, to_add)
+    tf_pub.publish(Transform(post_trans, post_rot), 'post'+name, base, to_add)
 
 if __name__ == '__main__':
     of = obj_file.ObjFile(SPRAY_BOTTLE_MESH_FILENAME)
@@ -117,7 +117,8 @@ if __name__ == '__main__':
             idx2 = int(inval[3])
             trans,rot = contacts_to_baxter_hand_pose(vertices[idx1], vertices[idx2])
             trans = (trans[0], trans[1], trans[2])
-            rot = (rot[0], rot[1], rot[2], rot[3])
+            #rot = (rot[0], rot[1], rot[2], rot[3])
+            rot = (0, np.sqrt(2)/2, 0, np.sqrt(2)/2)
             publish_frame_group(trans, rot, name, OBJ_BASE, True)
 
         else:
