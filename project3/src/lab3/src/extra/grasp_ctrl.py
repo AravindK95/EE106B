@@ -40,6 +40,28 @@ def publish_frame_group(trans, rot, name, base, to_add):
     tf_pub.publish(Transform(pre_trans, pre_rot), 'pre'+name, base, to_add)
     tf_pub.publish(Transform(post_trans, post_rot), 'post'+name, base, to_add)
 
+def addframe(trans, rot, name, base):
+    publish_frame_group(trans, rot, name, base, True)
+
+def rmframe(name):
+    # trans and rot values irrelevant
+    publish_frame_group((0,0,0), (0,0,0,0), name, 'blah', False)
+
+def moveto(name):
+    (trans,rot) = tf_listener.lookupTransform(BASE, name, rospy.Time(0))
+    moveit_pub.publish(Pose(Point(trans[0], trans[1], trans[2]),
+                            Quaternion(rot[0], rot[1], rot[2], rot[3])))
+
+def setclaw(state):
+    claw_pub.publish(state)
+
+def makepose(name, idx1, idx2):
+    trans,rot = contacts_to_baxter_hand_pose(vertices[idx1], vertices[idx2])
+    trans = (trans[0], trans[1], trans[2])
+    #rot = (rot[0], rot[1], rot[2], rot[3])
+    rot = (0, np.sqrt(2)/2, 0, np.sqrt(2)/2)
+    publish_frame_group(trans, rot, name, OBJ_BASE, True)
+
 if __name__ == '__main__':
     of = obj_file.ObjFile(SPRAY_BOTTLE_MESH_FILENAME)
     mesh = of.read()
@@ -76,8 +98,7 @@ if __name__ == '__main__':
             rot = eval(inval[2])    # quaternion
             name = inval[3]
             base = inval[4]
-
-            publish_frame_group(trans, rot, name, base, True)
+            addframe(trans, rot, name, base)
 
         elif cmd == 'rmframe':
             # stop publishing grasp frame 
@@ -85,9 +106,7 @@ if __name__ == '__main__':
                $ cmd >> rmframe child
             """
             name = inval[1]
-
-            # trans and rot values irrelevant
-            publish_frame_group((0,0,0), (0,0,0,0), name, 'blah', False)
+            rmframe(name)
 
         elif cmd == 'moveto':
             # command moveit
@@ -95,9 +114,7 @@ if __name__ == '__main__':
                $ cmd >> moveto child
             """
             name = inval[1]
-            (trans,rot) = tf_listener.lookupTransform(BASE, name, rospy.Time(0))
-            moveit_pub.publish(Pose(Point(trans[0], trans[1], trans[2]),
-                                    Quaternion(rot[0], rot[1], rot[2], rot[3])))
+            moveto(name)
 
         elif cmd == 'setclaw':
             # command the end effector
@@ -105,7 +122,7 @@ if __name__ == '__main__':
                $ cmd >> setclaw True 
             """
             claw_bool = eval(inval[1])
-            claw_pub.publish(claw_bool)
+            setclaw(claw_bool)
 
         elif cmd == 'makepose':
             # turn two force closure vertices into a tf frame
@@ -115,11 +132,31 @@ if __name__ == '__main__':
             name = inval[1]
             idx1 = int(inval[2])
             idx2 = int(inval[3])
-            trans,rot = contacts_to_baxter_hand_pose(vertices[idx1], vertices[idx2])
-            trans = (trans[0], trans[1], trans[2])
-            #rot = (rot[0], rot[1], rot[2], rot[3])
-            rot = (0, np.sqrt(2)/2, 0, np.sqrt(2)/2)
-            publish_frame_group(trans, rot, name, OBJ_BASE, True)
+            makepose(name, idx1, idx2)
+
+        elif cmd == 'test':
+            # runs repeated tests of a single grasp
+            """Example input:
+                $ cmd >> test name
+            """
+            name = inval[1]
+            while not rospy.is_shutdown():
+                if raw_input("Test again? [y/n] >> ") == 'n':
+                    break
+
+                moveto('pre'+name)
+                rospy.sleep(2)
+                moveto(name)
+                rospy.sleep(2)
+                setclaw(True)
+                rospy.sleep(2)
+                moveto('post'+name)
+                rospy.sleep(4)
+                moveto(name)
+                rospy.sleep(2)
+                setclaw(False)
+                rospy.sleep(2)
+                moveto('pre'+name)
 
         else:
             print 'Bad command: '+inval[0]
