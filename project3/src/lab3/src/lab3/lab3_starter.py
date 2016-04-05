@@ -51,9 +51,9 @@ if __name__ == '__main__':
     # 1. Generate candidate pairs of contact points
     pairs = []
     print "Generating point-pairs"
-    # for i in range(len(vertices)):
-    #     for j in range(i, len(vertices)):
-    #         pairs.append((i, j))
+    for i in range(len(vertices)):
+        for j in range(i, len(vertices)):
+            pairs.append((i, j))
     print "Total pairs: "+str(len(pairs))
 
     # 2. Check for force closure
@@ -61,18 +61,18 @@ if __name__ == '__main__':
     c = np.zeros((3, 2))
     n = np.zeros((3, 2))
     successful = []
-    # for i, j in pairs:
-    #     print(i, j)
-    #     v1, v2 = vertices[i], vertices[j]
-    #     n1, n2 = normals[i], normals[j]
+    for i, j in pairs:
+        print(i, j)
+        v1, v2 = vertices[i], vertices[j]
+        n1, n2 = normals[i], normals[j]
 
-    #     c[:, 0] = v1
-    #     c[:, 1] = v2
-    #     n[:, 0] = n1
-    #     n[:, 1] = n2
+        c[:, 0] = v1
+        c[:, 1] = v2
+        n[:, 0] = n1
+        n[:, 1] = n2
 
-    #     retval = fc.force_closure(c, n, 0, 0.5, 0)
-    #     if retval: successful.append((i, j))
+        retval = fc.force_closure(c, n, 0, 0.5, 0)
+        if retval: successful.append((i, j))
 
     print "Found pairs: "
     print successful
