@@ -11,15 +11,16 @@ frame_dict = {}
 
 def handle_call(data):
     if data.to_add:
-        rbt = ((data.rbt.translation.x, 
+        info = ((data.rbt.translation.x, 
                 data.rbt.translation.y, 
                 data.rbt.translation.z), 
                (data.rbt.rotation.x, 
                 data.rbt.rotation.y, 
                 data.rbt.rotation.z, 
-                data.rbt.rotation.w))
+                data.rbt.rotation.w),
+               data.base)
 
-        frame_dict[data.name] = rbt
+        frame_dict[data.name] = info
 
     else:
         remove_frame(data.name)
@@ -47,7 +48,7 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
 
         print "Publishing: "+str(frame_dict.keys())
-        for name, rbt in frame_dict.items():
-            publish_frame(br, rbt[0], rbt[1], name, OBJECT_FRAME_NAME)
+        for name, info in frame_dict.items():
+            publish_frame(br, info[0], info[1], name, info[2])
 
         rate.sleep()

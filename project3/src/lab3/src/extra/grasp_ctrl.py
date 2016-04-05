@@ -95,7 +95,7 @@ if __name__ == '__main__':
                $ cmd >> moveto child
             """
             name = inval[1]
-            (trans,rot) = tf_listener.lookupTransform(name, BASE, rospy.Time(0))
+            (trans,rot) = tf_listener.lookupTransform(BASE, name, rospy.Time(0))
             moveit_pub.publish(Pose(Point(trans[0], trans[1], trans[2]),
                                     Quaternion(rot[0], rot[1], rot[2], rot[3])))
 
