@@ -3,10 +3,8 @@ import sys
 import rospkg
 import numpy as np
 
-PROJECT_PATH = rospkg.RosPack().get_path('lab3')
-sys.path.append(PROJECT_PATH+'/src/lab3')
-sys.path.append(PROJECT_PATH+'/src/extra')
-SPRAY_BOTTLE_MESH_FILENAME = PROJECT_PATH+'/data/spray.obj'
+PROJECT_PATH = rospkg.RosPack().get_path('grasper_plan')
+MESH_FILENAME = PROJECT_PATH+'/data/basicbox.obj'
 
 import obj_file
 import transformations
@@ -36,7 +34,7 @@ def contacts_to_baxter_hand_pose(contact1, contact2):
     return t_obj_gripper, q_obj_gripper 
 
 if __name__ == '__main__':
-    of = obj_file.ObjFile(SPRAY_BOTTLE_MESH_FILENAME)
+    of = obj_file.ObjFile(MESH_FILENAME)
     mesh = of.read()
 
     vertices = mesh.vertices
@@ -47,12 +45,14 @@ if __name__ == '__main__':
     print 'Num triangles:', len(triangles)
     print 'Num normals:', len(normals)
 
+    for i in range(len(vertices)):
+        print i, vertices[i], normals[i]
 
     # 1. Generate candidate pairs of contact points
     pairs = []
     print "Generating point-pairs"
     for i in range(len(vertices)):
-        for j in range(i, len(vertices)):
+        for j in range(i+1, len(vertices)):
             pairs.append((i, j))
     print "Total pairs: "+str(len(pairs))
 
@@ -71,7 +71,7 @@ if __name__ == '__main__':
         n[:, 0] = n1
         n[:, 1] = n2
 
-        retval = fc.force_closure(c, n, 0, 0.5, 0)
+        retval = fc.force_closure(c, n, 0, 0.9, 0)
         if retval: successful.append((i, j))
 
     print "Found pairs: "
@@ -83,10 +83,10 @@ if __name__ == '__main__':
     of.close()
 
     # 3. Convert each grasp to a hand pose
-    contact1 = vertices[2777]
-    contact2 = vertices[2805]
-    t_obj_gripper, q_obj_gripper = contacts_to_baxter_hand_pose(contact1, contact2)
-    print 'Translation', t_obj_gripper
-    print 'Rotation', q_obj_gripper
+    # contact1 = vertices[2777]
+    # contact2 = vertices[2805]
+    # t_obj_gripper, q_obj_gripper = contacts_to_baxter_hand_pose(contact1, contact2)
+    # print 'Translation', t_obj_gripper
+    # print 'Rotation', q_obj_gripper
 
     # 4. Execute on the actual robot
