@@ -38,6 +38,10 @@ class Mesh3D(object):
     def normals(self):
         return self.normals_
 
+    @property
+    def colors(self):
+        return
+
     def compute_normals(self):
         """ Get vertex normals from triangles"""
         vertex_array = np.array(self.vertices_)
@@ -67,14 +71,14 @@ class Mesh3D(object):
     def tri_normals(self):
         """ Return a list of the triangle normals """
         vertex_array = np.array(self.vertices_)
-        normals = []
+        self.normals_ = []
         for tri in self.triangles_:
             v0 = vertex_array[tri[0],:]
             v1 = vertex_array[tri[1],:]
             v2 = vertex_array[tri[2],:]
             n = np.cross(v1 - v0, v2 - v0)
             n = n / np.linalg.norm(n)
-            normals.append(n.tolist())
+            self.normals_.append(n.tolist())
 
     def center_vertices_avg(self):
         """ Re-center vertices at average vertex """
