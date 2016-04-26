@@ -28,12 +28,22 @@ def fc_to_hand_pose(contact1, contact2, hand_param):
 	gripper_y_axis = gripper_y_axis / np.linalg.norm(gripper_y_axis) #normalize y axis
 	
 	reachable_grasps = []
-	#loop checks if circle of potential grasps around the y axis are valid
-	number_of_grasps = 24
-	for i in range (0, number_of_grasps-1):
-		theta = np.pi / 12 * i
-		gripper_z_axis = np.array ([0,0,1])* #some sort of rotation matrix in theta
+	#checks which potential grasp orientations (front, top, back) around the y axis are valid
+	thetas = [-np.pi/2, 0, np.pi/2]
+	for i in range thetas:
+		gripper_z_axis = np.array([gripper_y_axis[1],-gripper_y_axis[0],0]) # z axis starts off parallel to table plane
 		gripper_x_axis = np.cross(gripper_y_axis, gripper_z_axis)
+		
+		#Construct Rigid Body Transform from axis and center
+		gripper_RBT = np.concatenate((gripper_x_axis, gripper_y_axis, gripper_z_axis, finger_center), axis=0).T
+		gripper_RBT = np.append(gripper_RBT, np.array([0,0,0,1]), axis = 1)
+
+		#Apply appropriate rotation transformation for orientation being tested
+		applied_rotation = np.array([[np.cos(i), -np.sin(i), 0, 0], [np.sin(i) -np.cos(i), 0, 0], [0,0,1,0], [0,0,0,1]])
+		gripper_RBT = gripper_RBT * applied_rotation
+
+		#Check distance from back of hand to the bounding box
+
 
 
 if __name__ == '__main__':
