@@ -4,7 +4,7 @@ import rospkg
 import numpy as np
 
 PROJECT_PATH = rospkg.RosPack().get_path('grasper_plan')
-MESH_FILENAME = PROJECT_PATH+'/data/sphere.obj'
+MESH_FILENAME = PROJECT_PATH+'/data/pencil.obj'
 
 import obj_file
 import transformations
@@ -40,6 +40,8 @@ if __name__ == '__main__':
 
     vertices = mesh.tri_centers()
     triangles = mesh.triangles
+    # Manually flip normals based on what gives results
+    # normals = [[-n[0], -n[1], -n[2]] for n in mesh.normals]
     normals = mesh.normals
 
     print 'Num vertices:', len(vertices)
