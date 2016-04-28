@@ -2,19 +2,26 @@
 import sys
 import rospkg
 import numpy as np
+
+PROJECT_PATH = rospkg.RosPack().get_path('grasper_plan')
+sys.path.append(PROJECT_PATH+'/src')
 import obj_file
 import transformations
 
-def check_collision(contact_center, verticies, hand_param):
+MESH_FILENAME = PROJECT_PATH+'/data/pencil.obj'
+FC_DATA_FILENAME = PROJECT_PATH+'/data/points.csv'
+GRASP_DATA_FILENAME = PROJECT_PATH+'/data/grasps.csv'
+
+def check_collision(contact_center, vertices, hand_param):
     tol = 0.5
-    aligned_verticies_z = []
+    aligned_vertices_z = []
     
     # create list of mesh points that have same x and y value as contact_center within a tolerance
-    for i in verticies:
+    for i in vertices:
         if np.abs(i[0]-contact_center[0]) < tol and np.abs(i[1]-contact_center[1]) < tol:
-            aligned_verticies_z.append(i[2])
+            aligned_vertices_z.append(i[2])
 
-    max_distance = max(aligned_verticies_z)
+    max_distance = max(aligned_vertices_z)
     if max_distance > hand_param['center_distance']:
         return False
     else
@@ -26,7 +33,7 @@ def fc_to_hand_pose(contact1, contact2, object_mesh, hand_param):
 
     finger_center = (c1+c2)/2
 
-    gripper_y_axis = c2 - c1#align y axis to connect the two contacts
+    gripper_y_axis = c2 - c1 #align y axis to connect the two contacts
     
     #check to see if gripper can open wide enough to reach contact points
     contact_distance = np.linalg.norm(gripper_y_axis)
@@ -52,12 +59,12 @@ def fc_to_hand_pose(contact1, contact2, object_mesh, hand_param):
         gripper_RBT = gripper_RBT * applied_rotation
 
         #transform all matrix points to the gripper frame 
-        original_verticies = np.array(object_mesh.verticies)
-        homogenous_verticies = np.append(original_verticies, np.ones((,original_verticies.shape(0)), axis = 1))
-        transformed_verticies = np.dot(homogeneous_verticies, gripper_RBT)
+        original_vertices = np.array(object_mesh.vertices)
+        homogenous_vertices = np.append(original_vertices, np.ones((,original_vertices.shape(0)), axis = 1))
+        transformed_vertices = np.dot(homogeneous_vertices, gripper_RBT)
 
         #Check collisions beetween the hand and the mesh
-        if check_collision(finger_center, transformed_verticies,hand_param) = False:
+        if check_collision(finger_center, transformed_vertices,hand_param) = False:
             reachable_grasps.append(gripper_RBT)
     output_list = ()
     
@@ -71,7 +78,37 @@ def main():
     # file I/O stuff
     # call fc_to_hand_pose for every FC point
     # save list of all grasps
+    in_f = open(FC_DATA_FILENAME, 'r')
+    data = of.read()
+    data = data.split('\n')
+    data.pop(0)
 
+    # fc_points structure: list of tuples, with each tuple being one fc pair
+    # (i, j, [xi, yi, zi], [xj, yj, zj])
+    # i and j are 0 indexed
+    fc_points = list()
+    for row in data:
+    	vals = row.split(';')
+    	fc_points.append((vals.split(';')))
+    in_f.close()
+
+    ### WESLEY DOES MAGIC HERE ###
+    # grasp_list structure: list of tuples, with each tuple being one grasp
+    # (RBT, c1, c2, dist(c1, c2))
+    grasp_list = list()
+
+
+    out_f = open(GRASP_DATA_FILENAME, 'w')
+    out_f.write('rbt; c1; c2; dist\n')
+    for g in grasp_list:
+    	rbt, c1, c2, d = g
+    	out_f.write(str(list(rbt.flatten())) + '; ')
+    	out_f.write(str(list(c1.flatten())) + '; ')
+    	out_f.write(str(list(c2.flatten())) + '; ')
+    	out_f.write(str(d) + '\n')
+
+    out_f.close()
 
 if __name__ == '__main__':
     main()
+ 

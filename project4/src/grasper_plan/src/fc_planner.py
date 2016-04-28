@@ -41,8 +41,8 @@ if __name__ == '__main__':
     vertices = mesh.tri_centers()
     triangles = mesh.triangles
     # Manually flip normals based on what gives results
-    # normals = [[-n[0], -n[1], -n[2]] for n in mesh.normals]
     normals = mesh.normals
+    # normals = [[-n[0], -n[1], -n[2]] for n in mesh.normals]
 
     print 'Num vertices:', len(vertices)
     print 'Num triangles:', len(triangles)
@@ -50,11 +50,14 @@ if __name__ == '__main__':
 
     # 1. Generate candidate pairs of contact points
     pairs = []
+    c = 0
     print "Generating point-pairs"
     for i in range(len(vertices)):
         for j in range(i+1, len(vertices)):
             pairs.append((i, j))
-            print i*j + j
+            print c
+            c += 1
+
     print "Total pairs: "+str(len(pairs))
 
     # 2. Check for force closure
