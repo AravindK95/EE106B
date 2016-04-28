@@ -81,7 +81,7 @@ def fc_to_hand_pose(contact1, contact2, object_mesh, hand_param):
 
 
 def main():
-    hand_param = {'max_open': 500, 'center_distance': 2}
+    hand_param = {'max_open': .0445, 'center_distance': .0381}
     # read from mesh
     of = obj_file.ObjFile(MESH_FILENAME)
     mesh = of.read()
