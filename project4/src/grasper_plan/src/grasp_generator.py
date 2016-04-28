@@ -51,9 +51,10 @@ def fc_to_hand_pose(contact1, contact2, object_mesh, hand_param):
         gripper_x_axis = np.cross(gripper_y_axis, gripper_z_axis)
         
         #Construct RBT from axis and center
-        gripper_Rot = np.concatenate((gripper_x_axis, gripper_y_axis, gripper_z_axis),, axis=0)
+        gripper_Rot = np.concatenate((gripper_x_axis, gripper_y_axis, gripper_z_axis), axis=0)
         gripper_RBT = np.concatenate((gripper_Rot, finger_center.T), axis = 1)
         gripper_RBT = np.append(gripper_RBT, np.array([0,0,0,1]), axis = 1)
+        gripper_RBT = gripper_RBT.reshape((4,4))
 
         #Apply appropriate rotation transformation for orientation being tested
         applied_rotation = np.array([[np.cos(i), 0, np.sin(i), 0], [0, 1, 0, 0], [-np.sin(i), 0, np.cos(i), 0], [0,0,0,1]])
@@ -63,10 +64,10 @@ def fc_to_hand_pose(contact1, contact2, object_mesh, hand_param):
         if np.vdot(gripper_z_axis, np.array([0,0,1])) > -0.1:
             #transform all matrix points to the gripper frame 
             original_vertices = np.array(object_mesh.vertices)
-            homogenous_vertices = np.append(original_vertices, np.ones(1,original_vertices.shape(0)))
-            transformed_vertices = np.array()
-            for j in homogeneous_vertices:
-                transformed_vertices = np.append(transformed_verticies,np.dot(homogeneous_vertices, gripper_RBT))
+            homogenous_vertices = np.append(original_vertices, np.ones((1,original_vertices.shape[0])))
+            transformed_vertices = np.array([])
+            for j in homogenous_vertices:
+                transformed_vertices = np.append(transformed_vertices,np.dot(homogenous_vertices, gripper_RBT))
 
             #Check collisions beetween the hand and the mesh
             if check_collision(finger_center, transformed_vertices, hand_param) == False:
@@ -90,35 +91,33 @@ def main():
     in_f = open(FC_DATA_FILENAME, 'r')
     data = in_f.read()
     data = data.split('\n')
-    #data = [i.split(';') for i in data]
-    print data
     data.pop(0)
+    data.pop()
 
     # fc_points structure: list of tuples, with each tuple being one fc pair
     # (i, j, [xi, yi, zi], [xj, yj, zj])
     # i and j are 0 indexed
     fc_points = list()
     for row in data:
-    	vals = row.split(';')
-    	fc_points.append((vals.split(';')))
+        fc_points.append(tuple([eval(e) for e in row.split(';')]))
     in_f.close()
 
     ### WESLEY DOES MAGIC HERE ###
     # grasp_list structure: list of tuples, with each tuple being one grasp
     # (RBT, c1, c2, dist(c1, c2))
-    grasp_list = list()
+    grasp_list = []
 
-    for i in fc_points
+    for i in fc_points:
         grasp_list.append(fc_to_hand_pose(i[2], i[3], mesh, hand_param))
 
     out_f = open(GRASP_DATA_FILENAME, 'w')
     out_f.write('rbt; c1; c2; dist\n')
     for g in grasp_list:
-    	rbt, c1, c2, d = g
-    	out_f.write(str(list(rbt.flatten())) + '; ')
-    	out_f.write(str(list(c1.flatten())) + '; ')
-    	out_f.write(str(list(c2.flatten())) + '; ')
-    	out_f.write(str(d) + '\n')
+        rbt, c1, c2, d = g
+        out_f.write(str(list(rbt.flatten())) + '; ')
+        out_f.write(str(list(c1.flatten())) + '; ')
+        out_f.write(str(list(c2.flatten())) + '; ')
+        out_f.write(str(d) + '\n')
 
     out_f.close()
 
