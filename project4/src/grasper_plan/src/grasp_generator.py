@@ -12,20 +12,20 @@ MESH_FILENAME = PROJECT_PATH+'/data/pencil.obj'
 FC_DATA_FILENAME = PROJECT_PATH+'/data/points.csv'
 GRASP_DATA_FILENAME = PROJECT_PATH+'/data/grasps.csv'
 
-def check_collision(contact_center, vertices, hand_param):
-    tol = 0.5
-    aligned_vertices_z = []
+# def check_collision(contact_center, vertices, hand_param):
+#     tol = 0.5
+#     aligned_vertices_z = []
     
-    # create list of mesh points that have same x and y value as contact_center within a tolerance
-    for i in vertices:
-        if np.abs(i[0]-contact_center[0]) < tol and np.abs(i[1]-contact_center[1]) < tol:
-            aligned_vertices_z.append(i[2])
+#     # create list of mesh points that have same x and y value as contact_center within a tolerance
+#     for i in vertices:
+#         if np.abs(i[0]-contact_center[0]) < tol and np.abs(i[1]-contact_center[1]) < tol:
+#             aligned_vertices_z.append(i[2])
 
-    max_distance = max(aligned_vertices_z)
-    if max_distance > hand_param['center_distance']:
-        return False
-    else:
-        return True
+#     max_distance = max(aligned_vertices_z)
+#     if max_distance > hand_param['center_distance']:
+#         return False
+#     else:
+#         return True
 
 def fc_to_hand_pose(contact1, contact2, object_mesh, hand_param):
     c1 = np.array(contact1)
@@ -58,29 +58,30 @@ def fc_to_hand_pose(contact1, contact2, object_mesh, hand_param):
 
         #Apply appropriate rotation transformation for orientation being tested
         applied_rotation = np.array([[np.cos(i), 0, np.sin(i), 0], [0, 1, 0, 0], [-np.sin(i), 0, np.cos(i), 0], [0,0,0,1]])
-        gripper_RBT = gripper_RBT * applied_rotation
+        gripper_RBT = applied_rotation * gripper_RBT
 
         # Only calculate possible grasps if Z axis does not point downwards
-        if np.vdot(gripper_z_axis, np.array([0,0,1])) > -0.1:
+        print np.vdot(gripper_RBT[2, :3], np.array([0,0,1]))
+        if np.vdot(gripper_RBT[2, :3], np.array([0,0,1])) > -0.001:
             #transform all matrix points to the gripper frame 
             original_vertices = np.array(object_mesh.vertices)
-            homogenous_vertices = np.append(original_vertices, np.ones((1,original_vertices.shape[0])))
-            transformed_vertices = np.array([])
-            for j in homogenous_vertices:
-                transformed_vertices = np.append(transformed_vertices,np.dot(homogenous_vertices, gripper_RBT))
+            homogenous_vertices = np.append(original_vertices, np.ones((original_vertices.shape[0],1)), axis = 1)
+            transformed_vertices = np.empty((original_vertices.shape[0], 4))
+            for j in range(homogenous_vertices.shape[0]):
+                transformed_vertices[j, :] = np.dot(homogenous_vertices[j, :], gripper_RBT)
 
             #Check collisions beetween the hand and the mesh
-            if check_collision(finger_center, transformed_vertices, hand_param) == False:
-                reachable_grasps.append(gripper_RBT)
+            #if check_collision(finger_center, transformed_vertices, hand_param) == False:
+            reachable_grasps.append(gripper_RBT)
     
-    output_list = ()
+    output_list = []
     for i in reachable_grasps:
         output_list.append((i, c1, c2, contact_distance))
-    return output_list
+    return output_list if len(output_list) != 0 else None
 
 
 def main():
-    hand_param = {'max_open': 4, 'center_distance': 2}
+    hand_param = {'max_open': 500, 'center_distance': 2}
     # read from mesh
     of = obj_file.ObjFile(MESH_FILENAME)
     mesh = of.read()
@@ -108,7 +109,9 @@ def main():
     grasp_list = []
 
     for i in fc_points:
-        grasp_list.append(fc_to_hand_pose(i[2], i[3], mesh, hand_param))
+        valid_grasps = fc_to_hand_pose(i[2], i[3], mesh, hand_param)
+        if valid_grasps is not None:
+            grasp_list.extend(valid_grasps)
 
     out_f = open(GRASP_DATA_FILENAME, 'w')
     out_f.write('rbt; c1; c2; dist\n')
