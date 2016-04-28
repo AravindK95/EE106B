@@ -52,17 +52,18 @@ def fc_to_hand_pose(contact1, contact2, object_mesh, hand_param):
         
         #Construct RBT from axis and center
         gripper_Rot = np.concatenate((gripper_x_axis, gripper_y_axis, gripper_z_axis), axis=0)
-        gripper_RBT = np.concatenate((gripper_Rot, finger_center.T), axis = 1)
-        gripper_RBT = np.append(gripper_RBT, np.array([0,0,0,1]), axis = 1)
-        gripper_RBT = gripper_RBT.reshape((4,4))
+        gripper_Rot = gripper_Rot.reshape((3,3))
+        gripper_RBT = np.concatenate((gripper_Rot, finger_center.reshape((3,1))), axis = 1)
+        gripper_RBT = np.concatenate((gripper_RBT, np.array([0,0,0,1]).reshape((1,4))), axis = 0)
 
         #Apply appropriate rotation transformation for orientation being tested
         applied_rotation = np.array([[np.cos(i), 0, np.sin(i), 0], [0, 1, 0, 0], [-np.sin(i), 0, np.cos(i), 0], [0,0,0,1]])
-        gripper_RBT = applied_rotation * gripper_RBT
+        #print applied_rotation
+        gripper_RBT = np.dot(gripper_RBT, applied_rotation)
+        # print gripper_RBT
 
         # Only calculate possible grasps if Z axis does not point downwards
-        print np.vdot(gripper_RBT[2, :3], np.array([0,0,1]))
-        if np.vdot(gripper_RBT[2, :3], np.array([0,0,1])) > -0.001:
+        if np.vdot(gripper_RBT[2, :3], np.array([0,0,1])) > -0.00000001:
             #transform all matrix points to the gripper frame 
             original_vertices = np.array(object_mesh.vertices)
             homogenous_vertices = np.append(original_vertices, np.ones((original_vertices.shape[0],1)), axis = 1)
@@ -81,7 +82,9 @@ def fc_to_hand_pose(contact1, contact2, object_mesh, hand_param):
 
 
 def main():
-    hand_param = {'max_open': .0445, 'center_distance': .0381}
+    #hand_param = {'max_open': .0445, 'center_distance': .0381}
+    hand_param = {'max_open': 400, 'center_distance': 400}
+
     # read from mesh
     of = obj_file.ObjFile(MESH_FILENAME)
     mesh = of.read()
