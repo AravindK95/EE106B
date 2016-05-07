@@ -8,7 +8,7 @@ sys.path.append(PROJECT_PATH+'/src')
 import obj_file
 import transformations
 
-MESH_FILENAME = PROJECT_PATH+'/data/pencil.obj'
+MESH_FILENAME = PROJECT_PATH+'/data/tenniscan.obj'
 FC_DATA_FILENAME = PROJECT_PATH+'/data/points.csv'
 GRASP_DATA_FILENAME = PROJECT_PATH+'/data/grasps.csv'
 
@@ -43,6 +43,7 @@ def fc_to_hand_pose(contact1, contact2, object_mesh, hand_param):
     gripper_y_axis = gripper_y_axis / np.linalg.norm(gripper_y_axis) #normalize y axis
     
     reachable_grasps = []
+    print gripper_y_axis
     #checks which potential grasp orientations (front, top, back) around the y axis are valid
     thetas = [0, np.pi/2, np.pi, 3*np.pi/2]
     for i in thetas:
@@ -83,7 +84,7 @@ def fc_to_hand_pose(contact1, contact2, object_mesh, hand_param):
 
 def main():
     #hand_param = {'max_open': .0445, 'center_distance': .0381}
-    hand_param = {'max_open': 400, 'center_distance': 400}
+    hand_param = {'max_open': 0.08255, 'center_distance': 0.0381}
 
     # read from mesh
     of = obj_file.ObjFile(MESH_FILENAME)

@@ -4,7 +4,7 @@ import numpy as np
 import rospy
 import tf
 from tf2_msgs.msg import TFMessage
-from lab3.msg import FrameCall
+from grasper_ctrl.msg import FrameCall
 
 OBJECT_FRAME_NAME = 'graspable_object'
 frame_dict = {}
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     rospy.init_node('grasp_tf_pub')
     br = tf.TransformBroadcaster()
 
-    rospy.Subscriber('lab3/tf', FrameCall, handle_call)
+    rospy.Subscriber('grasper_ctrl/tf', FrameCall, handle_call)
 
     rate = rospy.Rate(10.0)
     while not rospy.is_shutdown():

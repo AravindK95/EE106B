@@ -11,6 +11,7 @@ import transformations
 import fc
 
 GRASP_DATA_FILENAME = PROJECT_PATH+'/data/grasps.csv'
+SORTED_DATA_FILENAME = PROJECT_PATH+'/data/sorted.csv'
 
 ranking = []
 presort = []
@@ -62,11 +63,12 @@ def combine_minmax(grasps):
 
     for i in range(0,5):
         topfive.append(max(max(grasps,key=lambda x:x[0][0]), min(grasps,key=lambda x:x[0][2]),key=lambda x: x[0][1]))
+        # topfive.append(max(max(grasps,key=lambda x:x[0][0]),key=lambda x: x[0][1]))
         grasps.remove(topfive[i])
 
     return topfive
 
-def grasp_eval(grasp, cog=0):
+def grasp_eval(grasp, cog=0.10795):
     #grasp --> list of tuples
     # - (rbt,cp1,cp2,dist)
 
@@ -103,7 +105,9 @@ def grasp_eval(grasp, cog=0):
     cogdistsort.sort(key=lambda x: x[0])
 
     sortedminmax = combine_minmax(presort)
-    sortedminmax = combine_vote(hdistsort,vdistsort,cogdistsort,presort)
+    # sortedvote = combine_vote(hdistsort,vdistsort,cogdistsort,presort)
+
+    return sortedminmax
 
 
 if __name__ == '__main__':
@@ -118,4 +122,15 @@ if __name__ == '__main__':
         grasps.append(tuple([eval(e) for e in row.split(';')]))
     in_f.close()
 
-    print grasp_eval(grasps)
+    sortedgrasps = grasp_eval(grasps)
+    print sortedgrasps
+
+    out_f = open(SORTED_DATA_FILENAME, 'w')
+    out_f.write('c1; c2\n')
+    for g in sortedgrasps:
+        c1, c2 = g[1][0], g[2][0]
+        out_f.write(str(c1) + '; ')
+        out_f.write(str(c2) + '; ')
+        out_f.write('\n')
+
+    out_f.close()

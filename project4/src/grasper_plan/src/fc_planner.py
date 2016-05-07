@@ -4,7 +4,7 @@ import rospkg
 import numpy as np
 
 PROJECT_PATH = rospkg.RosPack().get_path('grasper_plan')
-MESH_FILENAME = PROJECT_PATH+'/data/pencil.obj'
+MESH_FILENAME = PROJECT_PATH+'/data/tenniscan.obj'
 
 import obj_file
 import transformations

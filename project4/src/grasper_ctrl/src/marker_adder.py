@@ -20,13 +20,13 @@ if __name__ == '__main__':
     pub = rospy.Publisher('grasper_ctrl/marker_pub', Marker, queue_size=3)
 
     m = Marker()
-    m.header.frame_id = 'global_frame'
+    m.header.frame_id = 'graspable_object'
     m.header.stamp = rospy.Time()
     m.ns = sys.argv[1].split('.')[0]
     m.id = 0
     m.type = Marker.MESH_RESOURCE
     m.action = Marker.ADD
-    m.pose = Pose(Point(0,0,0), Quaternion(1,0,0,1))
+    m.pose = Pose(Point(0,0,0), Quaternion(0,0,0,1))
     m.scale = Vector3(1,1,1)
     m.color = ColorRGBA(0.5,0.5,0.5,1)
     m.lifetime = rospy.Duration(3, 0)
