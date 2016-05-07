@@ -128,7 +128,16 @@ if __name__ == '__main__':
             t1 = transformations.translation_from_matrix(grasps[idx][1])
 
             addframe(t0, q0, inval[2]+'1', inval[3])
-            addframe(t0, q0, inval[2]+'2', inval[3])
+            addframe(t1, q1, inval[2]+'2', inval[3])
+
+        elif cmd == 'rmgrasps':
+            # remove published grasp pairs
+            """Example input:
+               $ cmd >> rmgrasps child
+            """
+            name = inval[1]
+            rmframe(name+'1')
+            rmframe(name+'2')
 
         # elif cmd == 'moveto':
         #     # command moveit

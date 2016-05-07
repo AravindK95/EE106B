@@ -89,8 +89,9 @@ def grasp_eval(grasp, cog=0.10795):
     for grasps in presort:
         zg1 = grasps[1][0][11]
         zg2 = grasps[2][0][11]
-        vdistsort.append([abs(zg1-zg2),grasps[1],grasps[2]])
-        grasps[0][1] = abs(zg1-zg2)
+        if np.abs(zg1 - zg2) > 0.05:
+            vdistsort.append([abs(zg1-zg2),grasps[1],grasps[2]])
+            grasps[0][1] = abs(zg1-zg2)
 
     #add dist from cog
     for grasps in presort:
