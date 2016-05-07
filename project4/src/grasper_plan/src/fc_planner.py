@@ -75,7 +75,7 @@ if __name__ == '__main__':
         n[:, 0] = n1
         n[:, 1] = n2
 
-        retval = fc.force_closure(c, n, 0, 0.5, 0)
+        retval = fc.force_closure(c, n, 0, 0.4, 0)
         if retval: successful.append((i, j))
 
     print "Found pairs: "

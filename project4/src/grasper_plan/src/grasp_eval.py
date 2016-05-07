@@ -62,7 +62,8 @@ def combine_minmax(grasps):
     topfive = []
 
     for i in range(0,5):
-        topfive.append(max(max(grasps,key=lambda x:x[0][0]), min(grasps,key=lambda x:x[0][2]),key=lambda x: x[0][1]))
+        topfive.append(max(grasps, key=lambda x: x[0][1]))
+        # topfive.append(max(max(grasps,key=lambda x:x[0][0]), min(grasps,key=lambda x:x[0][2]),key=lambda x: x[0][1]))
         # topfive.append(max(max(grasps,key=lambda x:x[0][0]),key=lambda x: x[0][1]))
         grasps.remove(topfive[i])
 
@@ -91,6 +92,7 @@ def grasp_eval(grasp, cog=0.10795):
         zg2 = grasps[2][0][11]
         if np.abs(zg1 - zg2) > 0.05:
             vdistsort.append([abs(zg1-zg2),grasps[1],grasps[2]])
+            print abs(zg1-zg2)
             grasps[0][1] = abs(zg1-zg2)
 
     #add dist from cog

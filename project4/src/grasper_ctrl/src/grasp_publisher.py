@@ -10,6 +10,7 @@ from lab3.msg import FrameCall
 
 PROJECT_PATH = rospkg.RosPack().get_path('grasper_plan')
 GRASP_DB_FILENAME = PROJECT_PATH+'/data/sorted.csv'
+UNSORTED_DB_FILENAME = PROJECT_PATH+'/data/grasps.csv'
 sys.path.append(PROJECT_PATH+'/src')
 
 # import obj_file
@@ -77,6 +78,10 @@ if __name__ == '__main__':
 
     grasps = [(np.array(eval(grasp_pair[0])).reshape((4,4)),
                np.array(eval(grasp_pair[1])).reshape((4,4))) for grasp_pair in data]
+    # for i in range(len(grasps)):
+    #     rbt = grasps[i][0]
+    #     rbt[2,3] = rbt[2,3] + 0.5
+    #     grasps[i] = (rbt, grasps[i][1])
 
     rospy.init_node('grasp_publisher')
 
@@ -126,6 +131,9 @@ if __name__ == '__main__':
             t0 = transformations.translation_from_matrix(grasps[idx][0])
             q1 = transformations.quaternion_from_matrix(grasps[idx][1])
             t1 = transformations.translation_from_matrix(grasps[idx][1])
+
+            print t0
+            print t1
 
             addframe(t0, q0, inval[2]+'1', inval[3])
             addframe(t1, q1, inval[2]+'2', inval[3])
