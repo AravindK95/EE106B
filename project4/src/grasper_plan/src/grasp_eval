@@ -1,0 +1,29 @@
+import sys
+import rospkg
+import numpy as np
+import obj_file
+import transformations
+import fc
+
+ranking = []
+
+def wieght_algorithm(grasp1,grasp2):
+	dist1 = grasp1[3]
+	dist2 = grasp2[3]
+
+	weights [1 .5]
+	#1st heursitic is combination of dist between c1 and c2 of each grasp
+	#2nd heursitic is z distance between them
+	#3rd heuristic is how close it is to the bottom edge
+	rank = weight[0]*(dist1+dist2) + weight[1]*() + weight[1]*()
+
+	#I would like to normalize each of these characteristic.
+def grasp_eval(grasp, cog):
+	#grasp --> list of tuples
+	# - (rbt,cp1,cp2,dist)
+
+	# Order by distance
+    for i in range(len(grasp)):
+        for j in range(i+1, len(grasp)):
+            ranking.append([weight_algorithm(i,j),i,j])	
+
