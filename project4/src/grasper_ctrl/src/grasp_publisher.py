@@ -19,15 +19,39 @@ import transformations
 BASE = 'base'
 OBJ_BASE = 'graspable_object'
 
-def publish_frame_group(trans, rot, name, base, to_add):
+def publish_frame(trans, rot, name, base, to_add):
     tf_pub.publish(Transform(Vector3(trans[0], trans[1], trans[2]), 
                              Quaternion(rot[0], rot[1], rot[2], rot[3])), 
                    name, 
                    base, 
                    to_add)
-    #One of these is the correct direction to off set grap pos by.
-    # pre_trans = Vector3(trans[0] - 0.2, trans[1], trans[2])
-    # pre_rot = Quaternion(rot[0], rot[1], rot[2], rot[3])
+    
+    rospy.sleep(.25)
+    offset_object_frame = np.array([[1, 0, 0, 0], 
+                                      [0, 1, 0, 0], 
+                                      [0, 0, 1, -0.07], 
+                                      [0,0,0,1]])
+    offset_trans = tf.transformations.translation_from_matrix(offset_object_frame)
+    offset_rot = tf.transformations.quaternion_from_matrix(offset_object_frame)
+
+    tf_pub.publish(Transform(Vector3(offset_trans[0], offset_trans[1], offset_trans[2]), 
+                             Quaternion(offset_rot[0], offset_rot[1], offset_rot[2], offset_rot[3])), 
+                   'offset'+name, 
+                   name, 
+                   to_add)
+
+def publish_with_pregrasp(trans, rot, name, base, to_add):
+    publish_frame(trans, rot, name, base, to_add)
+    
+    pregrasp_object_frame = np.array([[1, 0, 0, 0], 
+                                      [0, 1, 0, 0], 
+                                      [0, 0, 1, -0.15], 
+                                      [0,0,0,1]])
+    pre_trans = tf.transformations.translation_from_matrix(pregrasp_object_frame)
+    pre_rot = tf.transformations.quaternion_from_matrix(pregrasp_object_frame)
+    print pre_trans
+    print pre_rot
+
 
     #One of these is the correct direction to lift it straight up. Probably z.
     # post_trans = Vector3(trans[0], trans[1], trans[2] + 0.3)
@@ -36,38 +60,17 @@ def publish_frame_group(trans, rot, name, base, to_add):
     #so we do not need to change orientation of end effector.
 
     #Publish the pre and post trans
-    # tf_pub.publish(Transform(pre_trans, pre_rot), 'pre'+name, base, to_add)
-    # tf_pub.publish(Transform(post_trans, post_rot), 'post'+name, base, to_add)
-
-def publish_with_pregrasp(trans, rot, RBT, name, base, to_add):
-    tf_pub.publish(Transform(Vector3(trans[0], trans[1], trans[2]), 
-                             Quaternion(rot[0], rot[1], rot[2], rot[3])), 
-                   name, 
-                   base, 
-                   to_add)
-
-    pregrasp_end_effector_frame = np.array([1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, -0.2], [0,0,0,1]])
-    pregrasp_object_frame = np.dot(pregrasp_end_effector_frame, np.linalg.inv(RBT))
-
-    #One of these is the correct direction to lift it straight up. Probably z.
-    # post_trans = Vector3(trans[0], trans[1], trans[2] + 0.3)
-    # post_rot = Quaternion(rot[0], rot[1], rot[2], rot[3])
-    #We want to the post orientation to be the same as the initial orientation during grasp
-    #so we do not need to change orientation of end effector.
-
-    #Publish the pre and post trans
-    tf_pub.publish(Transform(pre_trans, pre_rot), 'pre'+name, base, to_add)
-    # tf_pub.publish(Transform(post_trans, post_rot), 'post'+name, base, to_add)
+    publish_frame(pre_trans, pre_rot, 'pre'+name, name, to_add)
 
 def addframe(trans, rot, name, base):
-    publish_frame_group(trans, rot, name, base, True)
+    publish_frame(trans, rot, name, base, True)
 
 def rmframe(name):
     # trans and rot values irrelevant
-    publish_frame_group((0,0,0), (0,0,0,0), name, 'blah', False)
+    publish_frame((0,0,0), (0,0,0,0), name, 'blah', False)
 
 def moveto(name):
-    (trans,rot) = tf_listener.lookupTransform(BASE, name, rospy.Time(0))
+    (trans,rot) = tf_listener.lookupTransform(BASE, "offset"+name, rospy.Time(0))
     moveit_pub.publish(Pose(Point(trans[0], trans[1], trans[2]),
                             Quaternion(rot[0], rot[1], rot[2], rot[3])))
 
@@ -79,7 +82,7 @@ def makepose(name, idx1, idx2):
     trans = (trans[0], trans[1], trans[2])
     #rot = (rot[0], rot[1], rot[2], rot[3])
     rot = (0, np.sqrt(2)/2, 0, np.sqrt(2)/2)
-    publish_frame_group(trans, rot, name, OBJ_BASE, True)
+    publish_frame(trans, rot, name, OBJ_BASE, True)
 
 if __name__ == '__main__':
     # of = obj_file.ObjFile(SPRAY_BOTTLE_MESH_FILENAME)
@@ -107,7 +110,7 @@ if __name__ == '__main__':
 
     tf_pub = rospy.Publisher('grasper_ctrl/tf', FrameCall, queue_size=3)
     moveit_pub = rospy.Publisher('new_position', Pose, queue_size=3)
-    claw_pub = rospy.Publisher('gripper_/control', Bool, queue_size=3)
+    claw_pub = rospy.Publisher('gripper_control', Bool, queue_size=3)
 
     tf_listener = tf.TransformListener()
 
@@ -147,10 +150,10 @@ if __name__ == '__main__':
                $ cmd >> pubgrasps 3 child base
             """
             idx = eval(inval[1])
-            q0 = transformations.quaternion_from_matrix(grasps[idx][0])
-            t0 = transformations.translation_from_matrix(grasps[idx][0])
-            q1 = transformations.quaternion_from_matrix(grasps[idx][1])
-            t1 = transformations.translation_from_matrix(grasps[idx][1])
+            q0 = tf.transformations.quaternion_from_matrix(grasps[idx][0])
+            t0 = tf.transformations.translation_from_matrix(grasps[idx][0])
+            q1 = tf.transformations.quaternion_from_matrix(grasps[idx][1])
+            t1 = tf.transformations.translation_from_matrix(grasps[idx][1])
 
             print t0
             print t1
@@ -164,16 +167,16 @@ if __name__ == '__main__':
                $ cmd >> pubgrasps 3 child base
             """
             idx = eval(inval[1])
-            q0 = transformations.quaternion_from_matrix(grasps[idx][0])
-            t0 = transformations.translation_from_matrix(grasps[idx][0])
-            q1 = transformations.quaternion_from_matrix(grasps[idx][1])
-            t1 = transformations.translation_from_matrix(grasps[idx][1])
+            q0 = tf.transformations.quaternion_from_matrix(grasps[idx][0])
+            t0 = tf.transformations.translation_from_matrix(grasps[idx][0])
+            q1 = tf.transformations.quaternion_from_matrix(grasps[idx][1])
+            t1 = tf.transformations.translation_from_matrix(grasps[idx][1])
 
             print t0
             print t1
 
-            publish_with_pregrasp(t0, q0, grasps[idx][0], inval[2]+'1', inval[3])
-            publish_with_pregrasp(t1, q1, grasps[idx][1], inval[2]+'2', inval[3])
+            publish_with_pregrasp(t0, q0, inval[2]+'1', inval[3], True)
+            publish_with_pregrasp(t1, q1, inval[2]+'2', inval[3], True)
 
         elif cmd == 'rmgrasps':
             # remove published grasp pairs
@@ -199,40 +202,6 @@ if __name__ == '__main__':
             """
             claw_bool = eval(inval[1])
             setclaw(claw_bool)
-
-        elif cmd == 'makepose':
-            # turn two force closure vertices into a tf frame
-            """Example input:
-               $ cmd >> makepose name 2473 2035
-            """
-            name = inval[1]
-            idx1 = int(inval[2])
-            idx2 = int(inval[3])
-            makepose(name, idx1, idx2)
-
-        # elif cmd == 'test':
-        #     # runs repeated tests of a single grasp
-        #     """Example input:
-        #         $ cmd >> test name
-        #     """
-        #     name = inval[1]
-        #     while not rospy.is_shutdown():
-        #         if raw_input("Test again? [y/n] >> ") == 'n':
-        #             break
-
-        #         moveto('pre'+name)
-        #         rospy.sleep(2)
-        #         moveto(name)
-        #         rospy.sleep(2)
-        #         setclaw(True)
-        #         rospy.sleep(2)
-        #         moveto('post'+name)
-        #         rospy.sleep(4)
-        #         moveto(name)
-        #         rospy.sleep(2)
-        #         setclaw(False)
-        #         rospy.sleep(2)
-        #         moveto('pre'+name)
 
         else:
             print 'Bad command: '+inval[0]

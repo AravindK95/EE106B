@@ -1,0 +1,11 @@
+After executing ./baxter.sh: run the command "resource" before doing anything else
+
+Steps to Launch: 
+1. Enable Baxter: rosrun baxter_tools enable_robot.py -e
+2. Start Baxter Trajectory Controller: rosrun baxter_interface joint_trajectory_action_server.py
+3. Start Moveit on Baxter: roslaunch baxter_moveit_config move_group.launch
+
+To disable baxter after finishing session:
+rosrun baxter_tools enable_robot.py -d
+
+
