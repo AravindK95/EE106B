@@ -86,8 +86,8 @@ if __name__ == '__main__':
     rospy.init_node('grasp_publisher')
 
     tf_pub = rospy.Publisher('grasper_ctrl/tf', FrameCall, queue_size=3)
-    # moveit_pub = rospy.Publisher('new_position', Pose, queue_size=3)
-    # claw_pub = rospy.Publisher('gripper_/control', Bool, queue_size=3)
+    moveit_pub = rospy.Publisher('new_position', Pose, queue_size=3)
+    claw_pub = rospy.Publisher('gripper_/control', Bool, queue_size=3)
 
     tf_listener = tf.TransformListener()
 
@@ -147,31 +147,31 @@ if __name__ == '__main__':
             rmframe(name+'1')
             rmframe(name+'2')
 
-        # elif cmd == 'moveto':
-        #     # command moveit
-        #     """Example input: 
-        #        $ cmd >> moveto child
-        #     """
-        #     name = inval[1]
-        #     moveto(name)
+        elif cmd == 'moveto':
+            # command moveit
+            """Example input: 
+               $ cmd >> moveto child
+            """
+            name = inval[1]
+            moveto(name)
 
-        # elif cmd == 'setclaw':
-        #     # command the end effector
-        #     """Example input: 
-        #        $ cmd >> setclaw True 
-        #     """
-        #     claw_bool = eval(inval[1])
-        #     setclaw(claw_bool)
+        elif cmd == 'setclaw':
+            # command the end effector
+            """Example input: 
+               $ cmd >> setclaw True 
+            """
+            claw_bool = eval(inval[1])
+            setclaw(claw_bool)
 
-        # elif cmd == 'makepose':
-        #     # turn two force closure vertices into a tf frame
-        #     """Example input:
-        #        $ cmd >> makepose name 2473 2035
-        #     """
-        #     name = inval[1]
-        #     idx1 = int(inval[2])
-        #     idx2 = int(inval[3])
-        #     makepose(name, idx1, idx2)
+        elif cmd == 'makepose':
+            # turn two force closure vertices into a tf frame
+            """Example input:
+               $ cmd >> makepose name 2473 2035
+            """
+            name = inval[1]
+            idx1 = int(inval[2])
+            idx2 = int(inval[3])
+            makepose(name, idx1, idx2)
 
         # elif cmd == 'test':
         #     # runs repeated tests of a single grasp

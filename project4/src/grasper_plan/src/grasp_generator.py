@@ -12,20 +12,20 @@ MESH_FILENAME = PROJECT_PATH+'/data/tenniscan.obj'
 FC_DATA_FILENAME = PROJECT_PATH+'/data/points.csv'
 GRASP_DATA_FILENAME = PROJECT_PATH+'/data/grasps.csv'
 
-# def check_collision(contact_center, vertices, hand_param):
-#     tol = 0.5
-#     aligned_vertices_z = []
+def check_collision(contact_center, vertices, hand_param):
+    tol = 0.5
+    aligned_vertices_z = []
     
-#     # create list of mesh points that have same x and y value as contact_center within a tolerance
-#     for i in vertices:
-#         if np.abs(i[0]-contact_center[0]) < tol and np.abs(i[1]-contact_center[1]) < tol:
-#             aligned_vertices_z.append(i[2])
+    # create list of mesh points that have same x and y value as contact_center within a tolerance
+    for i in vertices:
+        if np.abs(i[0]-contact_center[0]) < tol and np.abs(i[1]-contact_center[1]) < tol:
+            aligned_vertices_z.append(i[2])
 
-#     max_distance = max(aligned_vertices_z)
-#     if max_distance > hand_param['center_distance']:
-#         return False
-#     else:
-#         return True
+    max_distance = max(aligned_vertices_z)
+    if max_distance > hand_param['center_distance']:
+        return False
+    else:
+        return True
 
 def fc_to_hand_pose(contact1, contact2, object_mesh, hand_param):
     c1 = np.array(contact1)
@@ -73,8 +73,8 @@ def fc_to_hand_pose(contact1, contact2, object_mesh, hand_param):
                 transformed_vertices[j, :] = np.dot(homogenous_vertices[j, :], gripper_RBT)
 
             #Check collisions beetween the hand and the mesh
-            #if check_collision(finger_center, transformed_vertices, hand_param) == False:
-            reachable_grasps.append(gripper_RBT)
+            if check_collision(finger_center, transformed_vertices, hand_param) == False:
+               reachable_grasps.append(gripper_RBT)
     
     output_list = []
     for i in reachable_grasps:
