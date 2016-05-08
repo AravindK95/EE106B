@@ -11,7 +11,9 @@ import transformations
 import fc
 
 GRASP_DATA_FILENAME = PROJECT_PATH+'/data/grasps.csv'
-SORTED_DATA_FILENAME = PROJECT_PATH+'/data/sorted.csv'
+SORTED_DATA_FILENAME1 = PROJECT_PATH+'/data/sortedminmax.csv'
+SORTED_DATA_FILENAME2 = PROJECT_PATH+'/data/sortedvote.csv'
+
 
 ranking = []
 presort = []
@@ -25,19 +27,26 @@ def combine_vote(hsort,vsort,cogsort,presort):
     #3rd heuristic is how close it is cog
     rank = presort
     counter = 1
-    for graspsh in hsort:
-        graspsh[0] = counter
-        counter = counter + 1
-    counter = 1
-    for graspsv in vsort:
-        counter = 1
-        graspsv[0] = counter
-        counter = counter + 1
-    counter = 1
-    for graspsc in cogsort:
-        counter = 1
-        graspsc[0] = counter
-        counter = counter + 1
+
+    for k in range(0,len(presort)):
+        hsort[k][0] = counter
+        vsort[k][0] = counter
+        cogsort[k][0] = counter
+        counter += 1
+
+    # for graspsh in hsort:
+    #     graspsh[0] = counter
+    #     counter = counter + 1
+    # counter = 1
+    # for graspsv in vsort:
+    #     counter = 1
+    #     graspsv[0] = counter
+    #     counter = counter + 1
+    # counter = 1
+    # for graspsc in cogsort:
+    #     counter = 1
+    #     graspsc[0] = counter
+    #     counter = counter + 1
 
     for item in rank:
         for graspsh in hsort:
@@ -62,8 +71,8 @@ def combine_minmax(grasps):
     topfive = []
 
     for i in range(0,5):
-        topfive.append(max(grasps, key=lambda x: x[0][1]))
-        # topfive.append(max(max(grasps,key=lambda x:x[0][0]), min(grasps,key=lambda x:x[0][2]),key=lambda x: x[0][1]))
+        # topfive.append(max(grasps, key=lambda x: x[0][1]))
+        topfive.append(max(max(grasps,key=lambda x:x[0][1]), min(grasps,key=lambda x:x[0][2]),key=lambda x: x[0][0]))
         # topfive.append(max(max(grasps,key=lambda x:x[0][0]),key=lambda x: x[0][1]))
         grasps.remove(topfive[i])
 
@@ -79,7 +88,11 @@ def grasp_eval(grasp, cog=0.10795):
     grasp = np.array(grasp)
     for i in range(grasp.shape[0]):
         for j in range(i+1, grasp.shape[0]):
-            presort.append([[0,0,0],grasp[i],grasp[j]])
+            zg1 = grasp[i][0][11]
+            zg2 = grasp[j][0][11]
+            if np.abs(zg1 - zg2) > 0.05 and np.abs(zg1 - zg2)<.25:
+                presort.append([[0,0,0],grasp[i],grasp[j]])
+
 
     #rank by horizontal distance
     for grasps in presort:
@@ -88,12 +101,10 @@ def grasp_eval(grasp, cog=0.10795):
   
     #add distance apart vertical
     for grasps in presort:
-        zg1 = grasps[1][0][11]
-        zg2 = grasps[2][0][11]
-        if np.abs(zg1 - zg2) > 0.05:
-            vdistsort.append([abs(zg1-zg2),grasps[1],grasps[2]])
-            print abs(zg1-zg2)
-            grasps[0][1] = abs(zg1-zg2)
+        zg1 = grasp[1][0][11]
+        zg2 = grasp[2][0][11]
+        vdistsort.append([abs(zg1-zg2),grasps[1],grasps[2]])
+        grasps[0][1] = abs(zg1-zg2)
 
     #add dist from cog
     for grasps in presort:
@@ -108,7 +119,7 @@ def grasp_eval(grasp, cog=0.10795):
     cogdistsort.sort(key=lambda x: x[0])
 
     sortedminmax = combine_minmax(presort)
-    # sortedvote = combine_vote(hdistsort,vdistsort,cogdistsort,presort)
+    sortedvote = combine_vote(hdistsort,vdistsort,cogdistsort,presort)
 
     return sortedminmax
 
@@ -128,7 +139,7 @@ if __name__ == '__main__':
     sortedgrasps = grasp_eval(grasps)
     print sortedgrasps
 
-    out_f = open(SORTED_DATA_FILENAME, 'w')
+    out_f = open(SORTED_DATA_FILENAME1, 'w')
     out_f.write('c1; c2\n')
     for g in sortedgrasps:
         c1, c2 = g[1][0], g[2][0]
@@ -136,4 +147,13 @@ if __name__ == '__main__':
         out_f.write(str(c2) + '; ')
         out_f.write('\n')
 
+    out_v = open(SORTED_DATA_FILENAME2, 'w')
+    out_v.write('c1; c2\n')
+    for g in sortedgrasps:
+        c1, c2 = g[1][0], g[2][0]
+        out_v.write(str(c1) + '; ')
+        out_v.write(str(c2) + '; ')
+        out_v.write('\n')
+
     out_f.close()
+    out_v.close()
