@@ -39,6 +39,26 @@ def publish_frame_group(trans, rot, name, base, to_add):
     # tf_pub.publish(Transform(pre_trans, pre_rot), 'pre'+name, base, to_add)
     # tf_pub.publish(Transform(post_trans, post_rot), 'post'+name, base, to_add)
 
+def publish_with_pregrasp(trans, rot, RBT, name, base, to_add):
+    tf_pub.publish(Transform(Vector3(trans[0], trans[1], trans[2]), 
+                             Quaternion(rot[0], rot[1], rot[2], rot[3])), 
+                   name, 
+                   base, 
+                   to_add)
+
+    pregrasp_end_effector_frame = np.array([1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, -0.2], [0,0,0,1]])
+    pregrasp_object_frame = np.dot(pregrasp_end_effector_frame, np.linalg.inv(RBT))
+
+    #One of these is the correct direction to lift it straight up. Probably z.
+    # post_trans = Vector3(trans[0], trans[1], trans[2] + 0.3)
+    # post_rot = Quaternion(rot[0], rot[1], rot[2], rot[3])
+    #We want to the post orientation to be the same as the initial orientation during grasp
+    #so we do not need to change orientation of end effector.
+
+    #Publish the pre and post trans
+    tf_pub.publish(Transform(pre_trans, pre_rot), 'pre'+name, base, to_add)
+    # tf_pub.publish(Transform(post_trans, post_rot), 'post'+name, base, to_add)
+
 def addframe(trans, rot, name, base):
     publish_frame_group(trans, rot, name, base, True)
 
@@ -137,6 +157,23 @@ if __name__ == '__main__':
 
             addframe(t0, q0, inval[2]+'1', inval[3])
             addframe(t1, q1, inval[2]+'2', inval[3])
+
+        elif cmd == 'pubgraspspre':
+            # publish a pair of grasps from datafile with their pregrasps, specify by index
+            """Example input:
+               $ cmd >> pubgrasps 3 child base
+            """
+            idx = eval(inval[1])
+            q0 = transformations.quaternion_from_matrix(grasps[idx][0])
+            t0 = transformations.translation_from_matrix(grasps[idx][0])
+            q1 = transformations.quaternion_from_matrix(grasps[idx][1])
+            t1 = transformations.translation_from_matrix(grasps[idx][1])
+
+            print t0
+            print t1
+
+            publish_with_pregrasp(t0, q0, grasps[idx][0], inval[2]+'1', inval[3])
+            publish_with_pregrasp(t1, q1, grasps[idx][1], inval[2]+'2', inval[3])
 
         elif cmd == 'rmgrasps':
             # remove published grasp pairs
