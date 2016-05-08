@@ -62,7 +62,8 @@ def combine_vote(hsort,vsort,cogsort,presort):
     for item in rank:
         item[0] = item[0][0] + item[0][1] + item[0][2]
     
-    return rank.sort(key=lambda x: x[0])
+    rank.sort(key=lambda x: x[0])
+    return rank
 
 def combine_minmax(grasps):
     #1st heursitic is combination of dist between c1 and c2 of each grasp
@@ -121,7 +122,7 @@ def grasp_eval(grasp, cog=0.10795):
     sortedminmax = combine_minmax(presort)
     sortedvote = combine_vote(hdistsort,vdistsort,cogdistsort,presort)
 
-    return sortedminmax
+    return sortedminmax, sortedvote
 
 
 if __name__ == '__main__':
@@ -136,8 +137,7 @@ if __name__ == '__main__':
         grasps.append(tuple([eval(e) for e in row.split(';')]))
     in_f.close()
 
-    sortedgrasps = grasp_eval(grasps)
-    print sortedgrasps
+    sortedgrasps, sortedvotegrasps = grasp_eval(grasps)
 
     out_f = open(SORTED_DATA_FILENAME1, 'w')
     out_f.write('c1; c2\n')
@@ -149,7 +149,7 @@ if __name__ == '__main__':
 
     out_v = open(SORTED_DATA_FILENAME2, 'w')
     out_v.write('c1; c2\n')
-    for g in sortedgrasps:
+    for g in sortedvotegrasps:
         c1, c2 = g[1][0], g[2][0]
         out_v.write(str(c1) + '; ')
         out_v.write(str(c2) + '; ')

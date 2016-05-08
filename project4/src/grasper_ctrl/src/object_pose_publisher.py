@@ -11,7 +11,7 @@ if __name__ == '__main__':
     broadcaster = tf.TransformBroadcaster()
  
     R_ar_obj = np.eye(3)
-    t_ar_obj = np.array([0, -0.2, 0])
+    t_ar_obj = np.array([-0.4, -0.2, 0.111125])
     T_ar_obj = np.eye(4)
     T_ar_obj[:3,:3] = R_ar_obj
     T_ar_obj[:3, 3] = t_ar_obj
@@ -22,7 +22,7 @@ if __name__ == '__main__':
     rate = rospy.Rate(1.0)
     while not rospy.is_shutdown():
         try:
-            broadcaster.sendTransform(t_ar_obj, q_ar_obj, rospy.Time.now(), '/graspable_object', '/ar_marker_2')
+            broadcaster.sendTransform(t_ar_obj, q_ar_obj, rospy.Time.now(), '/graspable_object', '/ar_marker_3')
         except:
             continue
         rate.sleep()

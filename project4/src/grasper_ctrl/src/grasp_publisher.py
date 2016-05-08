@@ -39,6 +39,26 @@ def publish_frame_group(trans, rot, name, base, to_add):
     # tf_pub.publish(Transform(pre_trans, pre_rot), 'pre'+name, base, to_add)
     # tf_pub.publish(Transform(post_trans, post_rot), 'post'+name, base, to_add)
 
+def publish_with_pregrasp(trans, rot, RBT, name, base, to_add):
+    tf_pub.publish(Transform(Vector3(trans[0], trans[1], trans[2]), 
+                             Quaternion(rot[0], rot[1], rot[2], rot[3])), 
+                   name, 
+                   base, 
+                   to_add)
+
+    pregrasp_end_effector_frame = np.array([1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, -0.2], [0,0,0,1]])
+    pregrasp_object_frame = np.dot(pregrasp_end_effector_frame, np.linalg.inv(RBT))
+
+    #One of these is the correct direction to lift it straight up. Probably z.
+    # post_trans = Vector3(trans[0], trans[1], trans[2] + 0.3)
+    # post_rot = Quaternion(rot[0], rot[1], rot[2], rot[3])
+    #We want to the post orientation to be the same as the initial orientation during grasp
+    #so we do not need to change orientation of end effector.
+
+    #Publish the pre and post trans
+    tf_pub.publish(Transform(pre_trans, pre_rot), 'pre'+name, base, to_add)
+    # tf_pub.publish(Transform(post_trans, post_rot), 'post'+name, base, to_add)
+
 def addframe(trans, rot, name, base):
     publish_frame_group(trans, rot, name, base, True)
 
@@ -86,8 +106,8 @@ if __name__ == '__main__':
     rospy.init_node('grasp_publisher')
 
     tf_pub = rospy.Publisher('grasper_ctrl/tf', FrameCall, queue_size=3)
-    # moveit_pub = rospy.Publisher('new_position', Pose, queue_size=3)
-    # claw_pub = rospy.Publisher('gripper_/control', Bool, queue_size=3)
+    moveit_pub = rospy.Publisher('new_position', Pose, queue_size=3)
+    claw_pub = rospy.Publisher('gripper_/control', Bool, queue_size=3)
 
     tf_listener = tf.TransformListener()
 
@@ -138,6 +158,23 @@ if __name__ == '__main__':
             addframe(t0, q0, inval[2]+'1', inval[3])
             addframe(t1, q1, inval[2]+'2', inval[3])
 
+        elif cmd == 'pubgraspspre':
+            # publish a pair of grasps from datafile with their pregrasps, specify by index
+            """Example input:
+               $ cmd >> pubgrasps 3 child base
+            """
+            idx = eval(inval[1])
+            q0 = transformations.quaternion_from_matrix(grasps[idx][0])
+            t0 = transformations.translation_from_matrix(grasps[idx][0])
+            q1 = transformations.quaternion_from_matrix(grasps[idx][1])
+            t1 = transformations.translation_from_matrix(grasps[idx][1])
+
+            print t0
+            print t1
+
+            publish_with_pregrasp(t0, q0, grasps[idx][0], inval[2]+'1', inval[3])
+            publish_with_pregrasp(t1, q1, grasps[idx][1], inval[2]+'2', inval[3])
+
         elif cmd == 'rmgrasps':
             # remove published grasp pairs
             """Example input:
@@ -147,31 +184,31 @@ if __name__ == '__main__':
             rmframe(name+'1')
             rmframe(name+'2')
 
-        # elif cmd == 'moveto':
-        #     # command moveit
-        #     """Example input: 
-        #        $ cmd >> moveto child
-        #     """
-        #     name = inval[1]
-        #     moveto(name)
+        elif cmd == 'moveto':
+            # command moveit
+            """Example input: 
+               $ cmd >> moveto child
+            """
+            name = inval[1]
+            moveto(name)
 
-        # elif cmd == 'setclaw':
-        #     # command the end effector
-        #     """Example input: 
-        #        $ cmd >> setclaw True 
-        #     """
-        #     claw_bool = eval(inval[1])
-        #     setclaw(claw_bool)
+        elif cmd == 'setclaw':
+            # command the end effector
+            """Example input: 
+               $ cmd >> setclaw True 
+            """
+            claw_bool = eval(inval[1])
+            setclaw(claw_bool)
 
-        # elif cmd == 'makepose':
-        #     # turn two force closure vertices into a tf frame
-        #     """Example input:
-        #        $ cmd >> makepose name 2473 2035
-        #     """
-        #     name = inval[1]
-        #     idx1 = int(inval[2])
-        #     idx2 = int(inval[3])
-        #     makepose(name, idx1, idx2)
+        elif cmd == 'makepose':
+            # turn two force closure vertices into a tf frame
+            """Example input:
+               $ cmd >> makepose name 2473 2035
+            """
+            name = inval[1]
+            idx1 = int(inval[2])
+            idx2 = int(inval[3])
+            makepose(name, idx1, idx2)
 
         # elif cmd == 'test':
         #     # runs repeated tests of a single grasp
