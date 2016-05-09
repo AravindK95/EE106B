@@ -8,9 +8,9 @@ sys.path.append(PROJECT_PATH+'/src')
 import obj_file
 import transformations
 
-MESH_FILENAME = PROJECT_PATH+'/data/tenniscan.obj'
-FC_DATA_FILENAME = PROJECT_PATH+'/data/points.csv'
-GRASP_DATA_FILENAME = PROJECT_PATH+'/data/grasps.csv'
+MESH_FILENAME = PROJECT_PATH+'/data/pawn_lowpoly.obj'
+FC_DATA_FILENAME = PROJECT_PATH+'/data/pawn_points.csv'
+GRASP_DATA_FILENAME = PROJECT_PATH+'/data/pawn_grasps.csv'
 
 def check_collision(contact_center, vertices, hand_param):
     tol = 0.5

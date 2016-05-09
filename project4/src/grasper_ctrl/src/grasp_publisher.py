@@ -51,13 +51,15 @@ def publish_with_pregrasp(trans, rot, name, base, to_add):
 
 
     #One of these is the correct direction to lift it straight up. Probably z.
-    # post_trans = Vector3(trans[0], trans[1], trans[2] + 0.3)
-    # post_rot = Quaternion(rot[0], rot[1], rot[2], rot[3])
+    post_trans = np.array([trans[0], trans[1], trans[2]+.2])
+    post_rot = np.array([rot[0], rot[1], rot[2], rot[3]])
     #We want to the post orientation to be the same as the initial orientation during grasp
     #so we do not need to change orientation of end effector.
 
     #Publish the pre and post trans
     publish_frame(pre_trans, pre_rot, 'pre'+name, name, to_add)
+    rospy.sleep(.25)
+    publish_frame(post_trans, post_rot, 'post'+name, base, to_add)
 
 def addframe(trans, rot, name, base):
     publish_frame(trans, rot, name, base, True)
@@ -189,7 +191,7 @@ if __name__ == '__main__':
                $ cmd >> movetopost
             """
             # trans and rot are relative to base frame
-            trans = [0.402, 0.157, 0.135]
+            trans = [0.502, 0.157, 0.235]
             rot = [0.486, 0.535, -0.479, 0.498]
             moveit_pub.publish(Pose(Point(trans[0], trans[1], trans[2]),
                                     Quaternion(rot[0], rot[1], rot[2], rot[3])))
@@ -199,16 +201,16 @@ if __name__ == '__main__':
             """Example input:
                $ cmd >> offer
             """
-            trans = [0.905, 0.369, 0.316]
+            trans = [0.905, 0.5, 0.316]
             rot = [0.181, 0.690, -0.088, 0.695]
             moveit_pub.publish(Pose(Point(trans[0], trans[1], trans[2]),
                                     Quaternion(rot[0], rot[1], rot[2], rot[3])))
             rospy.sleep(5)
             # Wave object like candy???
-            for offset in [0.2, -0.4, 0.4, -0.4, 0.4, -0.2]:
-                joint_vals = arm.joint_angles()
-                joint_vals['left_w1'] += offset
-                arm.move_to_joint_positions(joint_vals)
+            # for offset in [0.2, -0.4, 0.4, -0.4, 0.4, -0.2]:
+            #     joint_vals = arm.joint_angles()
+            #     joint_vals['left_w1'] += offset
+            #     arm.move_to_joint_positions(joint_vals)
 
         elif cmd == 'setclaw':
             # command the end effector

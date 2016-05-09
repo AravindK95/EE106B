@@ -10,9 +10,9 @@ import obj_file
 import transformations
 import fc
 
-GRASP_DATA_FILENAME = PROJECT_PATH+'/data/grasps.csv'
-SORTED_DATA_FILENAME1 = PROJECT_PATH+'/data/sortedminmax.csv'
-SORTED_DATA_FILENAME2 = PROJECT_PATH+'/data/sortedvote.csv'
+GRASP_DATA_FILENAME = PROJECT_PATH+'/data/pawn_grasps.csv'
+SORTED_DATA_FILENAME1 = PROJECT_PATH+'/data/pawn_sortedminmax.csv'
+SORTED_DATA_FILENAME2 = PROJECT_PATH+'/data/pawn_sortedvote.csv'
 
 
 ranking = []
@@ -79,7 +79,7 @@ def combine_minmax(grasps):
 
     return topfive
 
-def grasp_eval(grasp, cog=0.10795):
+def grasp_eval(grasp, cog=0.075):
     #grasp --> list of tuples
     # - (rbt,cp1,cp2,dist)
 
@@ -93,7 +93,7 @@ def grasp_eval(grasp, cog=0.10795):
             zg2 = grasp[j][0][11]
             if np.abs(zg1 - zg2) > 0.05 and np.abs(zg1 - zg2)<.25:
                 presort.append([[0,0,0],grasp[i],grasp[j]])
-
+    print presort
 
     #rank by horizontal distance
     for grasps in presort:
@@ -137,6 +137,7 @@ if __name__ == '__main__':
         grasps.append(tuple([eval(e) for e in row.split(';')]))
     in_f.close()
 
+    print grasps
     sortedgrasps, sortedvotegrasps = grasp_eval(grasps)
 
     out_f = open(SORTED_DATA_FILENAME1, 'w')
