@@ -53,10 +53,10 @@ def combine_vote(hsort,vsort,cogsort,presort):
             if graspsh == item:
                 item[0][0] = graspsh[0] 
         for graspsv in vsort:
-            if graspsh == item:
+            if graspsv == item:
                 item[0][1] = graspsv[0] 
         for graspsc in cogsort:         
-            if graspsh == item:
+            if graspsc == item:
                 item[0][2] = graspsc[0]
 
     for item in rank:

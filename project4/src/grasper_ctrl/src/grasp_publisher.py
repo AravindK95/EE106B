@@ -10,8 +10,8 @@ from geometry_msgs.msg import Transform, Pose, Vector3, Quaternion, Point
 from lab3.msg import FrameCall
 
 PROJECT_PATH = rospkg.RosPack().get_path('grasper_plan')
-GRASP_DB_FILENAME = PROJECT_PATH+'/data/sorted.csv'
-UNSORTED_DB_FILENAME = PROJECT_PATH+'/data/grasps.csv'
+GRASP_DB_FILENAME = PROJECT_PATH+'/data/pawn_sortedvote.csv'
+UNSORTED_DB_FILENAME = PROJECT_PATH+'/data/pawn_grasps.csv'
 
 BASE = 'base'
 OBJ_BASE = 'graspable_object'
@@ -205,12 +205,28 @@ if __name__ == '__main__':
             rot = [0.181, 0.690, -0.088, 0.695]
             moveit_pub.publish(Pose(Point(trans[0], trans[1], trans[2]),
                                     Quaternion(rot[0], rot[1], rot[2], rot[3])))
-            rospy.sleep(5)
+            rospy.sleep(3)
             # Wave object like candy???
-            # for offset in [0.2, -0.4, 0.4, -0.4, 0.4, -0.2]:
+            # for offset in [0.5, -0.5, 0.5, -0.5]:
             #     joint_vals = arm.joint_angles()
             #     joint_vals['left_w1'] += offset
-            #     arm.move_to_joint_positions(joint_vals)
+            #     arm.move_to_joint_positions(joint_vals, timeout=0.5)
+
+        elif cmd == 'offerpawn':
+            # moves arm to 'offer' grasped object
+            """Example input:
+               $ cmd >> offer
+            """
+            trans = [0.905, 0.5, 0.316]
+            rot = [0.747, -0.101, 0.654, 0.064]
+            moveit_pub.publish(Pose(Point(trans[0], trans[1], trans[2]),
+                                    Quaternion(rot[0], rot[1], rot[2], rot[3])))
+            rospy.sleep(3)
+            # Wave object like candy???
+            # for offset in [0.5, -0.5, 0.5, -0.5]:
+            #     joint_vals = arm.joint_angles()
+            #     joint_vals['left_w1'] += offset
+            #     arm.move_to_joint_positions(joint_vals, timeout=0.5)
 
         elif cmd == 'setclaw':
             # command the end effector
