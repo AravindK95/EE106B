@@ -3,7 +3,7 @@ import sys
 import numpy as np
 
 PROJECT_PATH = '/home/arak/git/ee106b/project4/src/grasper_plan'
-MESH_FILENAME = PROJECT_PATH+'/data/pawn_lowpoly.obj'
+MESH_FILENAME = PROJECT_PATH+'/data/tenniscan.obj'
 
 import obj_file
 import transformations
@@ -74,7 +74,7 @@ if __name__ == '__main__':
         n[:, 0] = n1
         n[:, 1] = n2
 
-        retval = fc.force_closure(c, n, 0, 0.4, 0)
+        retval = fc.force_closure(c, n, 0, 0.6, 0)
         if retval: successful.append((i, j))
 
     print "Found pairs: "
