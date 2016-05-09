@@ -3,7 +3,7 @@ import sys
 import numpy as np
 
 PROJECT_PATH = '/home/arak/git/ee106b/project4/src/grasper_plan'
-MESH_FILENAME = PROJECT_PATH+'/data/pawn_lowpoly.obj'
+MESH_FILENAME = PROJECT_PATH+'/data/tenniscan.obj'
 
 import obj_file
 import transformations
@@ -79,7 +79,7 @@ if __name__ == '__main__':
 
     print "Found pairs: "
     print successful
-    of = open(PROJECT_PATH+'/data/pawn_points.csv', 'w')
+    of = open(PROJECT_PATH+'/data/points.csv', 'w')
     of.write('i; j; ival; jval\n')
     for i, j in successful:
         of.write(str(i)+'; '+str(j)+'; ')
