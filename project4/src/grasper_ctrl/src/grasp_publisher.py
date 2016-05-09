@@ -4,6 +4,7 @@ import rospkg
 import rospy
 import tf
 import numpy as np
+from baxter_interface import Limb
 from std_msgs.msg import String, Bool
 from geometry_msgs.msg import Transform, Pose, Vector3, Quaternion, Point
 from lab3.msg import FrameCall
@@ -11,10 +12,6 @@ from lab3.msg import FrameCall
 PROJECT_PATH = rospkg.RosPack().get_path('grasper_plan')
 GRASP_DB_FILENAME = PROJECT_PATH+'/data/sorted.csv'
 UNSORTED_DB_FILENAME = PROJECT_PATH+'/data/grasps.csv'
-sys.path.append(PROJECT_PATH+'/src')
-
-# import obj_file
-import transformations
 
 BASE = 'base'
 OBJ_BASE = 'graspable_object'
@@ -28,9 +25,9 @@ def publish_frame(trans, rot, name, base, to_add):
     
     rospy.sleep(.25)
     offset_object_frame = np.array([[1, 0, 0, 0], 
-                                      [0, 1, 0, 0], 
-                                      [0, 0, 1, -0.07], 
-                                      [0,0,0,1]])
+                                    [0, 1, 0, 0], 
+                                    [0, 0, 1, -0.07], 
+                                    [0,0,0,1]])
     offset_trans = tf.transformations.translation_from_matrix(offset_object_frame)
     offset_rot = tf.transformations.quaternion_from_matrix(offset_object_frame)
 
@@ -85,13 +82,6 @@ def makepose(name, idx1, idx2):
     publish_frame(trans, rot, name, OBJ_BASE, True)
 
 if __name__ == '__main__':
-    # of = obj_file.ObjFile(SPRAY_BOTTLE_MESH_FILENAME)
-    # mesh = of.read()
-
-    # vertices = mesh.vertices
-    # triangles = mesh.triangles
-    # normals = mesh.normals
-
     fdata = open(GRASP_DB_FILENAME, 'r')
     data = fdata.read()
     fdata.close()
@@ -101,10 +91,6 @@ if __name__ == '__main__':
 
     grasps = [(np.array(eval(grasp_pair[0])).reshape((4,4)),
                np.array(eval(grasp_pair[1])).reshape((4,4))) for grasp_pair in data]
-    # for i in range(len(grasps)):
-    #     rbt = grasps[i][0]
-    #     rbt[2,3] = rbt[2,3] + 0.5
-    #     grasps[i] = (rbt, grasps[i][1])
 
     rospy.init_node('grasp_publisher')
 
@@ -113,6 +99,8 @@ if __name__ == '__main__':
     claw_pub = rospy.Publisher('gripper_control', Bool, queue_size=3)
 
     tf_listener = tf.TransformListener()
+
+    arm = Limb('left')
 
     while not rospy.is_shutdown():
         # parse input
@@ -194,6 +182,33 @@ if __name__ == '__main__':
             """
             name = inval[1]
             moveto(name)
+
+        elif cmd == 'movetopost':
+            # move effector arm to post grasp position
+            """Example input:
+               $ cmd >> movetopost
+            """
+            # trans and rot are relative to base frame
+            trans = [0.402, 0.157, 0.135]
+            rot = [0.486, 0.535, -0.479, 0.498]
+            moveit_pub.publish(Pose(Point(trans[0], trans[1], trans[2]),
+                                    Quaternion(rot[0], rot[1], rot[2], rot[3])))
+
+        elif cmd == 'offer':
+            # moves arm to 'offer' grasped object
+            """Example input:
+               $ cmd >> offer
+            """
+            trans = [0.905, 0.369, 0.316]
+            rot = [0.181, 0.690, -0.088, 0.695]
+            moveit_pub.publish(Pose(Point(trans[0], trans[1], trans[2]),
+                                    Quaternion(rot[0], rot[1], rot[2], rot[3])))
+            rospy.sleep(5)
+            # Wave object like candy???
+            for offset in [0.2, -0.4, 0.4, -0.4, 0.4, -0.2]:
+                joint_vals = arm.joint_angles()
+                joint_vals['left_w1'] += offset
+                arm.move_to_joint_positions(joint_vals)
 
         elif cmd == 'setclaw':
             # command the end effector
