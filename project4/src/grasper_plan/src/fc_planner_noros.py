@@ -74,12 +74,12 @@ if __name__ == '__main__':
         n[:, 0] = n1
         n[:, 1] = n2
 
-        retval = fc.force_closure(c, n, 0, 0.4, 0)
+        retval = fc.force_closure(c, n, 0, 0.6, 0)
         if retval: successful.append((i, j))
 
     print "Found pairs: "
     print successful
-    of = open(PROJECT_PATH+'/data/points.csv', 'w')
+    of = open(PROJECT_PATH+'/data/pawn_points.csv', 'w')
     of.write('i; j; ival; jval\n')
     for i, j in successful:
         of.write(str(i)+'; '+str(j)+'; ')
