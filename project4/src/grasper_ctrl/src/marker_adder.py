@@ -8,12 +8,7 @@ from std_msgs.msg import *
 from geometry_msgs.msg import Pose, Vector3, Point, Quaternion
 from visualization_msgs.msg import Marker
 
-MESH_FILENAME = 'package://grasper_plan/data/'+sys.argv[1]
-PROJECT_PATH = rospkg.RosPack().get_path('grasper_plan')
-sys.path.append(PROJECT_PATH+'/src')
-
-import transformations
-
+MESH_FILENAME = 'package://grasper_plan/data/dae/'+sys.argv[1]
 
 if __name__ == '__main__':
     rospy.init_node('grasp_marker_pub')
@@ -22,7 +17,7 @@ if __name__ == '__main__':
     m = Marker()
     m.header.frame_id = 'graspable_object'
     m.header.stamp = rospy.Time()
-    m.ns = sys.argv[1].split('.')[0]
+    m.ns = '.'.join(sys.argv[1].split('.')[:-1])    # removes file extension from argv[1]
     m.id = 0
     m.type = Marker.MESH_RESOURCE
     m.action = Marker.ADD
@@ -37,5 +32,5 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         pub.publish(m)
         m.id += 1
-        print m.id
+        # print m.id
         r.sleep()
