@@ -10,7 +10,7 @@ from geometry_msgs.msg import Transform, Pose, Vector3, Quaternion, Point
 from lab3.msg import FrameCall
 
 PROJECT_PATH = rospkg.RosPack().get_path('grasper_plan')
-GRASP_DB_FILENAME = PROJECT_PATH+'/data/pawn_sortedvote.csv'
+GRASP_DB_FILENAME = PROJECT_PATH+'/data/pawn_sortedminmax.csv'
 UNSORTED_DB_FILENAME = PROJECT_PATH+'/data/pawn_grasps.csv'
 
 BASE = 'base'

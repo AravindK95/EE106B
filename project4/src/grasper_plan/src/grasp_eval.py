@@ -151,9 +151,10 @@ def grasp_eval(grasp, cog=0.075):
     apartsort.sort(key=lambda x: x[0])
 
     sortedminmax = combine_minmax(presort)
-    sortedvote = combine_vote(hdistsort,vdistsort,cogdistsort,apartsort,presort)
+    # sortedvote = combine_vote(hdistsort,vdistsort,cogdistsort,apartsort,presort)
 
-    return sortedminmax, sortedvote
+    # return sortedminmax, sortedvote
+    return sortedminmax
 
 
 if __name__ == '__main__':
@@ -168,7 +169,9 @@ if __name__ == '__main__':
         grasps.append(tuple([eval(e) for e in row.split(';')]))
     in_f.close()
 
-    sortedgrasps, sortedvotegrasps = grasp_eval(grasps)
+    sortedgrasps = grasp_eval(grasps)
+    # sortedgrasps, sortedvotegrasps = grasp_eval(grasps)
+
 
     out_f = open(SORTED_DATA_FILENAME1, 'w')
     out_f.write('c1; c2\n')
@@ -178,13 +181,13 @@ if __name__ == '__main__':
         out_f.write(str(c2) + '; ')
         out_f.write('\n')
 
-    out_v = open(SORTED_DATA_FILENAME2, 'w')
-    out_v.write('c1; c2\n')
-    for g in sortedvotegrasps:
-        c1, c2 = g[1][0], g[2][0]
-        out_v.write(str(c1) + '; ')
-        out_v.write(str(c2) + '; ')
-        out_v.write('\n')
+    # out_v = open(SORTED_DATA_FILENAME2, 'w')
+    # out_v.write('c1; c2\n')
+    # for g in sortedvotegrasps:
+    #     c1, c2 = g[1][0], g[2][0]
+    #     out_v.write(str(c1) + '; ')
+    #     out_v.write(str(c2) + '; ')
+    #     out_v.write('\n')
 
     out_f.close()
-    out_v.close()
+    # out_v.close()
