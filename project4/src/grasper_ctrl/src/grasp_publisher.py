@@ -10,7 +10,7 @@ from geometry_msgs.msg import Transform, Pose, Vector3, Quaternion, Point
 from lab3.msg import FrameCall
 
 PROJECT_PATH = rospkg.RosPack().get_path('grasper_plan')
-GRASP_DB_FILENAME = PROJECT_PATH+'/data/sorted/pawn_sortedvote.csv'
+GRASP_DB_FILENAME = PROJECT_PATH+'/data/sorted/pawn_sortedminmax.csv'
 UNSORTED_DB_FILENAME = PROJECT_PATH+'/data/grasps/pawn_grasps.csv'
 
 BASE = 'base'
@@ -58,7 +58,7 @@ def publish_with_pregrasp(trans, rot, name, base, to_add):
 
     #Publish the pre and post trans
     publish_frame(pre_trans, pre_rot, 'pre'+name, name, to_add)
-    rospy.sleep(.25)
+    rospy.sleep(0.25)
     publish_frame(post_trans, post_rot, 'post'+name, base, to_add)
 
 def addframe(trans, rot, name, base):
@@ -135,23 +135,6 @@ if __name__ == '__main__':
             rmframe(name)
 
         elif cmd == 'pubgrasps':
-            # publish a pair of grasps from datafile, specify by index
-            """Example input:
-               $ cmd >> pubgrasps 3 child base
-            """
-            idx = eval(inval[1])
-            q0 = tf.transformations.quaternion_from_matrix(grasps[idx][0])
-            t0 = tf.transformations.translation_from_matrix(grasps[idx][0])
-            q1 = tf.transformations.quaternion_from_matrix(grasps[idx][1])
-            t1 = tf.transformations.translation_from_matrix(grasps[idx][1])
-
-            print t0
-            print t1
-
-            addframe(t0, q0, inval[2]+'1', inval[3])
-            addframe(t1, q1, inval[2]+'2', inval[3])
-
-        elif cmd == 'pubgraspspre':
             # publish a pair of grasps from datafile with their pregrasps, specify by index
             """Example input:
                $ cmd >> pubgrasps 3 child base
@@ -202,26 +185,10 @@ if __name__ == '__main__':
                $ cmd >> offer
             """
             trans = [0.905, 0.5, 0.316]
-            rot = [0.181, 0.690, -0.088, 0.695]
-            moveit_pub.publish(Pose(Point(trans[0], trans[1], trans[2]),
-                                    Quaternion(rot[0], rot[1], rot[2], rot[3])))
-            rospy.sleep(3)
-            # Wave object like candy???
-            # for offset in [0.5, -0.5, 0.5, -0.5]:
-            #     joint_vals = arm.joint_angles()
-            #     joint_vals['left_w1'] += offset
-            #     arm.move_to_joint_positions(joint_vals, timeout=0.5)
-
-        elif cmd == 'offerpawn':
-            # moves arm to 'offer' grasped object
-            """Example input:
-               $ cmd >> offer
-            """
-            trans = [0.905, 0.5, 0.316]
             rot = [0.747, -0.101, 0.654, 0.064]
             moveit_pub.publish(Pose(Point(trans[0], trans[1], trans[2]),
-                                    Quaternion(rot[0], rot[1], rot[2], rot[3])))
-            rospy.sleep(3)
+                            Quaternion(rot[0], rot[1], rot[2], rot[3])))
+
             # Wave object like candy???
             # for offset in [0.5, -0.5, 0.5, -0.5]:
             #     joint_vals = arm.joint_angles()
@@ -235,6 +202,29 @@ if __name__ == '__main__':
             """
             claw_bool = eval(inval[1])
             setclaw(claw_bool)
+
+        elif cmd == 'fulltest':
+            # run the baxter through a full pickup and handoff operation
+            """Example input:
+               $ cmd >> fulltest child
+            """
+            name = inval[1]
+            setclaw(False)
+            rospy.sleep(1)
+            moveto('pre'+name)
+            rospy.sleep(1)
+            moveto(name)
+            rospy.sleep(3)
+            setclaw(True)
+            rospy.sleep(3)
+            moveto('post'+name)
+            rospy.sleep(1)
+            trans = [0.905, 0.5, 0.316]
+            rot = [0.747, -0.101, 0.654, 0.064]
+            moveit_pub.publish(Pose(Point(trans[0], trans[1], trans[2]),
+                            Quaternion(rot[0], rot[1], rot[2], rot[3])))
+            rospy.sleep(1)
+
 
         else:
             print 'Bad command: '+inval[0]
