@@ -26,7 +26,7 @@ def publish_frame(trans, rot, name, base, to_add):
     rospy.sleep(.25)
     offset_object_frame = np.array([[1, 0, 0, 0], 
                                     [0, 1, 0, 0], 
-                                    [0, 0, 1, -0.07], 
+                                    [0, 0, 1, -0.065], 
                                     [0,0,0,1]])
     offset_trans = tf.transformations.translation_from_matrix(offset_object_frame)
     offset_rot = tf.transformations.quaternion_from_matrix(offset_object_frame)

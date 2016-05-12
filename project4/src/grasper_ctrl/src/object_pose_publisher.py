@@ -30,7 +30,7 @@ if __name__ == '__main__':
     rate = rospy.Rate(1.0)
     while not rospy.is_shutdown():
         try:
-            broadcaster.sendTransform(t_ar_obj, q_ar_obj, rospy.Time.now(), '/graspable_object', '/ar_marker_1')
+            broadcaster.sendTransform(t_ar_obj, q_ar_obj, rospy.Time.now(), '/graspable_object', '/ar_marker_0')
             broadcaster.sendTransform(t_gripper_obj, q_gripper_obj, rospy.Time.now(), '/left_gripper_endpoint', '/left_gripper')
         except:
             continue
