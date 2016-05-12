@@ -10,7 +10,7 @@ from geometry_msgs.msg import Transform, Pose, Vector3, Quaternion, Point
 from lab3.msg import FrameCall
 
 PROJECT_PATH = rospkg.RosPack().get_path('grasper_plan')
-GRASP_DB_FILENAME = PROJECT_PATH+'/data/sorted/pawn_sortedminmax.csv'
+GRASP_DB_FILENAME = PROJECT_PATH+'/data/sorted/pawn_sortedvote.csv'
 UNSORTED_DB_FILENAME = PROJECT_PATH+'/data/grasps/pawn_grasps.csv'
 
 BASE = 'base'
@@ -26,7 +26,7 @@ def publish_frame(trans, rot, name, base, to_add):
     rospy.sleep(.25)
     offset_object_frame = np.array([[1, 0, 0, 0], 
                                     [0, 1, 0, 0], 
-                                    [0, 0, 1, -0.065], 
+                                    [0, 0, 1, -0.07], 
                                     [0,0,0,1]])
     offset_trans = tf.transformations.translation_from_matrix(offset_object_frame)
     offset_rot = tf.transformations.quaternion_from_matrix(offset_object_frame)
@@ -211,18 +211,15 @@ if __name__ == '__main__':
             name = inval[1]
             setclaw(False)
             rospy.sleep(1)
-            moveto('pre'+name)
-            rospy.sleep(1)
             moveto(name)
             rospy.sleep(3)
             setclaw(True)
             rospy.sleep(3)
             moveto('post'+name)
-            rospy.sleep(1)
-            trans = [0.905, 0.5, 0.316]
-            rot = [0.747, -0.101, 0.654, 0.064]
-            moveit_pub.publish(Pose(Point(trans[0], trans[1], trans[2]),
-                            Quaternion(rot[0], rot[1], rot[2], rot[3])))
+            rospy.sleep(3)
+            moveto(name)
+            rospy.sleep(3)
+            setclaw(False)
             rospy.sleep(1)
 
 

@@ -20,7 +20,6 @@ def check_collision(contact_center, vertices, hand_param):
     for i in vertices:
         if np.abs(i[0]-contact_center[0]) < tol and np.abs(i[1]-contact_center[1]) < tol:
             aligned_vertices_z.append(i[2])
-
     max_distance = max(aligned_vertices_z)
     if max_distance > hand_param['center_distance']:
         return False
@@ -37,7 +36,7 @@ def fc_to_hand_pose(contact1, contact2, object_mesh, hand_param):
     
     #check to see if gripper can open wide enough to reach contact points
     contact_distance = np.linalg.norm(gripper_y_axis)
-    if contact_distance > hand_param['max_open']:
+    if contact_distance > hand_param['max_open'] or contact_distance < hand_param['min_open']:
         return None
     
     gripper_y_axis = gripper_y_axis / np.linalg.norm(gripper_y_axis) #normalize y axis
@@ -64,7 +63,7 @@ def fc_to_hand_pose(contact1, contact2, object_mesh, hand_param):
         # print gripper_RBT
 
         # Only calculate possible grasps if Z axis does not point downwards
-        if np.vdot(gripper_RBT[2, :3], np.array([0,0,1])) > -0.00000001:
+        if np.vdot(gripper_RBT[2, :3], np.array([0,0,1])) < 0.7:
             #transform all matrix points to the gripper frame 
             original_vertices = np.array(object_mesh.vertices)
             homogenous_vertices = np.append(original_vertices, np.ones((original_vertices.shape[0],1)), axis = 1)
@@ -84,7 +83,7 @@ def fc_to_hand_pose(contact1, contact2, object_mesh, hand_param):
 
 def main():
     #hand_param = {'max_open': .0445, 'center_distance': .0381}
-    hand_param = {'max_open': 0.08255, 'center_distance': 0.0381}
+    hand_param = {'max_open': 0.08, 'min_open': 0.0425, 'center_distance': 0.0381}
 
     # read from mesh
     of = obj_file.ObjFile(MESH_FILENAME)
