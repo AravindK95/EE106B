@@ -3,7 +3,8 @@ import sys
 import numpy as np
 
 PROJECT_PATH = '/home/arak/git/ee106b/project4/src/grasper_plan'
-MESH_FILENAME = PROJECT_PATH+'/data/obj/tenniscan.obj'
+MESH_FILENAME = PROJECT_PATH+'/data/obj/bar_clamp.obj'
+POINTS_FILENAME = PROJECT_PATH+'/data/fc/bar_clamp_points.csv'
 
 import obj_file
 import transformations
@@ -17,7 +18,7 @@ def contacts_to_baxter_hand_pose(contact1, contact2):
     # compute gripper center and axis
     center = 0.5 * (c1 + c2)
     y_axis = c2 - c1
-    y_axis = y_axis / np.linalg.norm(y_axis)
+    y_axis = y_axis / np.linalg.norm(axis)
     z_axis = np.array([y_axis[1], -y_axis[0], 0]) # the z axis will always be in the table plane for now
     z_axis = z_axis / np.linalg.norm(z_axis)
     x_axis = np.cross(y_axis, z_axis)
@@ -79,7 +80,7 @@ if __name__ == '__main__':
 
     print "Found pairs: "
     print successful
-    of = open(PROJECT_PATH+'/data/points.csv', 'w')
+    of = open(POINTS_FILENAME, 'w')
     of.write('i; j; ival; jval\n')
     for i, j in successful:
         of.write(str(i)+'; '+str(j)+'; ')
