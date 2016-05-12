@@ -3,7 +3,7 @@ import sys
 import numpy as np
 
 PROJECT_PATH = '/home/arak/git/ee106b/project4/src/grasper_plan'
-MESH_FILENAME = PROJECT_PATH+'/data/tenniscan.obj'
+MESH_FILENAME = PROJECT_PATH+'/data/obj/tenniscan.obj'
 
 import obj_file
 import transformations

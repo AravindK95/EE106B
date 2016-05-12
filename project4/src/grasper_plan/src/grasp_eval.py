@@ -10,10 +10,9 @@ import obj_file
 import transformations
 import fc
 
-GRASP_DATA_FILENAME = PROJECT_PATH+'/data/pawn_grasps.csv'
-SORTED_DATA_FILENAME1 = PROJECT_PATH+'/data/pawn_sortedminmax.csv'
-SORTED_DATA_FILENAME2 = PROJECT_PATH+'/data/pawn_sortedvote.csv'
-
+GRASP_DATA_FILENAME = PROJECT_PATH+'/data/grasps/pawn_grasps.csv'
+SORTED_DATA_FILENAME1 = PROJECT_PATH+'/data/sorted/pawn_sortedminmax.csv'
+SORTED_DATA_FILENAME2 = PROJECT_PATH+'/data/sorted/pawn_sortedvote.csv'
 
 ranking = []
 presort = []

@@ -6,7 +6,6 @@ import tf
 from tf2_msgs.msg import TFMessage
 from grasper_ctrl.msg import FrameCall
 
-OBJECT_FRAME_NAME = 'graspable_object'
 frame_dict = {}
 
 def handle_call(data):
